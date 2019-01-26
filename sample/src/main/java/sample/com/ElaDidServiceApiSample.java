@@ -6,6 +6,8 @@ import org.elastos.conf.RetCodeConfiguration;
 import org.elastos.entity.ReturnMsgEntity;
 import org.elastos.service.ElaDidService;
 import org.elastos.service.ElaDidServiceImp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +16,8 @@ import java.util.concurrent.TimeUnit;
 
 
 public class ElaDidServiceApiSample {
+    private static Logger logger = LoggerFactory.getLogger(ElaDidServiceApiSample.class);
+
     String payPrivateKey = "17f9885d36ce7c646cd1d613708e9b375f81b81309fbdfbd922d0cd72faadb1b";
     String payPublicKey = "035ADEF4A1566BD30B2A89327ECC3DE9B876F9624AEBEDDA7725A24816125CE261";
     String payPublicAddr = "EJqsNp9qSWkX7wkkKeKnqeubok6FxuA9un";
@@ -95,13 +99,11 @@ public class ElaDidServiceApiSample {
     }
 
     public void packDidRawData() throws Exception {
-        ReturnMsgEntity ret = didService.packDidRawData(didPrivateKey, didPropertyKey, didPropertyValue);
-        long status = ret.getStatus();
-        if (status != RetCodeConfiguration.SUCC) {
-            System.out.println("Err didService.packDidRawData failed. result:" + JSON.toJSONString(ret.getResult()));
+        String rawData = didService.packDidRawData(didPrivateKey, didPropertyKey, didPropertyValue);
+        if (null == rawData) {
+            System.out.println("Err didService.packDidRawData failed.");
             return;
         }
-        String rawData = (String) ret.getResult();
         System.out.println("DidService.packDidRawData rawData:" + rawData);
     }
 
@@ -167,13 +169,13 @@ public class ElaDidServiceApiSample {
     public final static void main(String[] args) throws Exception {
         ElaDidServiceApiSample sample = new ElaDidServiceApiSample();
         sample.createDid();
-        sample.getPublicKey();
-        sample.getDid();
-        sample.signAndVerifyDidMessage();
+//        sample.getPublicKey();
+//        sample.getDid();
+//        sample.signAndVerifyDidMessage();
         sample.packDidRawData();
-        sample.setAndGetDidProperty();
-        sample.deleteDidProperty();
-        sample.deleteDid();
+//        sample.setAndGetDidProperty();
+//        sample.deleteDidProperty();
+//        sample.deleteDid();
     }
 
 }

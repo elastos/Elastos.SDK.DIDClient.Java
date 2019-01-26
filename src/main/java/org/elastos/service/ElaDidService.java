@@ -36,10 +36,10 @@ public interface ElaDidService {
     ReturnMsgEntity getDid(String didPrivateKey);
 
     //将DID属性数据打包成上链数据
-    ReturnMsgEntity packDidRawData(String didPrivateKey, String propertyKey, String propertyData);
+    String packDidRawData(String didPrivateKey, String propertyKey, String propertyData);
 
     //将多个DID属性数据打包成上链数据
-    ReturnMsgEntity packDidRawData(String didPrivateKey, Map<String, String> properties);
+    String packDidRawData(String didPrivateKey, Map<String, String> properties);
 
     //已实现
     ReturnMsgEntity setDidProperty(String payWalletPrivateKey, String didPrivateKey, String propertyKey, String propertyData);

@@ -19,10 +19,9 @@
         <!--使用非maven jar包,并且指定包-->
         <dependency>
             <groupId>org.elastos</groupId>
-            <artifactId>did_service.lib</artifactId>
+            <artifactId>did_client.lib</artifactId>
             <version>0.0.1</version>
         </dependency>
-
     </dependencies>
 
 

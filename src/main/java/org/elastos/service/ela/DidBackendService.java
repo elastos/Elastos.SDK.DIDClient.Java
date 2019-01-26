@@ -7,19 +7,6 @@
 package org.elastos.service.ela;
 
 import com.alibaba.fastjson.JSON;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
-import org.apache.http.util.EntityUtils;
 import org.elastos.conf.RetCodeConfiguration;
 import org.elastos.entity.ChainType;
 import org.elastos.entity.Errors;
@@ -38,15 +25,15 @@ public class DidBackendService {
     private static Logger logger = LoggerFactory.getLogger(DidBackendService.class);
     private static String didPreFix;
 
-    private static final String getUtosByAddr = "/api/1/didexplorer/asset/utxos";
-    private static final String transaction = "/api/1/didexplorer/transaction";
+    private static final String getUtosByAddr = "/api/v1/asset/utxos/";
+    private static final String transaction = "/api/v1/transaction";
 
     static {
         boolean ret = OutSideConfig.readOutSide();
         if (ret) {
             didPreFix = OutSideConfig.getObject("node.prefix");
         } else {
-            didPreFix = "http://localhost:8091";
+            didPreFix = "http://localhost:21334";
         }
     }
 
@@ -70,7 +57,7 @@ public class DidBackendService {
 
         checkAddr(address);
 
-        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.GET, didPreFix + getUtosByAddr + "/" + type.toString() + "/" + address, null);
+        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.GET, didPreFix + getUtosByAddr, address);
         if (msgEntity.getStatus() == RetCodeConfiguration.SUCC) {
             try {
                 List<Map> data = (List<Map>) msgEntity.getResult();
@@ -95,12 +82,12 @@ public class DidBackendService {
 
         String jsonEntity = JSON.toJSONString(entity);
         System.out.println("tx send data:" + jsonEntity);
-        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.POST, didPreFix + transaction + "/" + type.toString(), jsonEntity);
+        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.POST, didPreFix + transaction, jsonEntity);
         return msgEntity;
     }
 
     public static Map<String, Object> getTransaction(String txId, ChainType type) {
-        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.GET, didPreFix + transaction + "/" + type.toString() + "/" + txId, null);
+        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.GET, didPreFix + transaction, txId);
 
         if (msgEntity.getStatus() == RetCodeConfiguration.SUCC) {
             return (Map<String, Object>) msgEntity.getResult();
@@ -111,20 +98,15 @@ public class DidBackendService {
 
     private static ReturnMsgEntity elaReqChainData(ReqMethod method, String url, String data) {
         String response;
+
         if (ReqMethod.GET == method) {
             String str = url;
             if (null != data) {
-                str += "?" + data;
+                str += data;
             }
             response = HttpKit.get(str);
         } else {
-//            response = HttpKit.post("http://localhost:21334/api/v1/transaction", data);
-            try {
-                response = DidBackendService.requestOnce(url, data);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return new ReturnMsgEntity().setResult("Err: post data to server").setStatus(RetCodeConfiguration.INTERNAL_ERROR);
-            }
+            response = HttpKit.post(url, data);
         }
 
         Map<String, Object> msg = (Map<String, Object>) JSON.parse(response);
@@ -135,35 +117,5 @@ public class DidBackendService {
             status = RetCodeConfiguration.PROCESS_ERROR;
         }
         return new ReturnMsgEntity().setResult(msg.get("Result")).setStatus(status);
-    }
-
-    private static String requestOnce(String url, String data) throws Exception {
-        BasicHttpClientConnectionManager connManager;
-        connManager = new BasicHttpClientConnectionManager(
-                RegistryBuilder.<ConnectionSocketFactory>create()
-                        .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                        .register("https", SSLConnectionSocketFactory.getSocketFactory())
-                        .build(),
-                null,
-                null,
-                null
-        );
-
-        HttpClient httpClient = HttpClientBuilder.create()
-                .setConnectionManager(connManager)
-                .build();
-
-        HttpPost httpPost = new HttpPost(url);
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(20000).setConnectTimeout(20000).build();
-        httpPost.setConfig(requestConfig);
-
-        StringEntity postEntity = new StringEntity(data, "UTF-8");
-        httpPost.addHeader("Content-Type", "application/json");
-        httpPost.setEntity(postEntity);
-
-        HttpResponse httpResponse = httpClient.execute(httpPost);
-        HttpEntity httpEntity = httpResponse.getEntity();
-        return EntityUtils.toString(httpEntity, "UTF-8");
-
     }
 }

@@ -131,13 +131,14 @@ public class ElaDidServiceImp implements ElaDidService {
     }
 
     @Override
-    public ReturnMsgEntity packDidRawData(String didPrivateKey, String propertyKey, String propertyValue) {
+    public String packDidRawData(String didPrivateKey, String propertyKey, String propertyValue) {
         if (StringUtils.isAnyBlank(
                 didPrivateKey,
                 propertyKey,
                 propertyValue)) {
-
-            return new ReturnMsgEntity().setResult("Err: packDidRawData Parameter invalid.").setStatus(RetCodeConfiguration.BAD_REQUEST);
+            logger.error("Err: packDidRawData parameter invalid");
+            System.out.println("Err: packDidRawData parameter invalid");
+            return null;
         }
 
         DidEntity.DidProperty property = new DidEntity.DidProperty();
@@ -151,19 +152,22 @@ public class ElaDidServiceImp implements ElaDidService {
         didEntity.setDid(did);
         String raw = packRawDid(didPrivateKey, didEntity);
         if (null == raw) {
-            return new ReturnMsgEntity().setResult("Err: packDidRawData packRawDid failed").setStatus(RetCodeConfiguration.PROCESS_ERROR);
+            logger.error("Err: packDidRawData packRawDid failed");
+            System.out.println("Err: packDidRawData packRawDid failed");
+            return null;
         } else {
-            return new ReturnMsgEntity().setResult(raw).setStatus(RetCodeConfiguration.SUCC);
+            return raw;
         }
-
     }
 
     @Override
-    public ReturnMsgEntity packDidRawData(String didPrivateKey, Map<String, String> propertiesMap) {
+    public String packDidRawData(String didPrivateKey, Map<String, String> propertiesMap) {
         if (StringUtils.isBlank(didPrivateKey)
                 || (null == propertiesMap)
                 || (propertiesMap.isEmpty())) {
-            return new ReturnMsgEntity().setResult("Err: packDidRawData Parameters invalid.").setStatus(RetCodeConfiguration.BAD_REQUEST);
+            logger.error("Err: packDidRawData parameter invalid");
+            System.out.println("Err: packDidRawData parameter invalid");
+            return null;
         }
 
         List<DidEntity.DidProperty> properties = new ArrayList<>();
@@ -174,9 +178,11 @@ public class ElaDidServiceImp implements ElaDidService {
         didEntity.setDid(did);
         String raw = packRawDid(didPrivateKey, didEntity);
         if (null == raw) {
-            return new ReturnMsgEntity().setResult("Err: packDidRawData packRawDid failed").setStatus(RetCodeConfiguration.PROCESS_ERROR);
+            logger.error("Err: packDidRawData packRawDid failed");
+            System.out.println("Err: packDidRawData packRawDid failed");
+            return null;
         } else {
-            return new ReturnMsgEntity().setResult(raw).setStatus(RetCodeConfiguration.SUCC);
+            return raw;
         }
     }
 

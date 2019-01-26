@@ -5,11 +5,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.elastos</groupId>
-  <artifactId>did_service.lib</artifactId>
-  <version>0.0.2</version>
+  <artifactId>did_client.lib</artifactId>
+  <version>0.0.1</version>
 
-  <name>did_service.lib</name>
-  <description>DID service library</description>
+  <name>did_client.lib</name>
+  <description>DID service client library</description>
   <url>http://www.elastos.org</url>
   <licenses>
     <license>
@@ -75,7 +75,7 @@
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-nop</artifactId>
+      <artifactId>slf4j-log4j12</artifactId>
       <version>1.7.2</version>
     </dependency>
     <dependency>

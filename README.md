@@ -19,16 +19,15 @@ With Maven：
 ```xml
 <dependency>
     <groupId>org.elastos</groupId>
-    <artifactId>did_service.lib</artifactId>
+    <artifactId>did_client.lib</artifactId>
     <version>0.0.1</version>
 </dependency>
 ```
 
 ## Run
 
-Those API should run with its backend, first configure and start the [DID service backend](https://github.com/elastos/Elastos.ORG.DID.Service/tree/refactor_backend).
-
-Then configure those API to backend with the configuration file ./conf/ela.did.properties beside your application directory. Change the "node.prefix" to your backend service URL.
+This lib must communicate to did node.
+So first you should configure those API to node with the configuration file ./conf/ela.did.properties beside your application directory. Change the "node.prefix" to your did node URL.
 
 ## DID Service API
 

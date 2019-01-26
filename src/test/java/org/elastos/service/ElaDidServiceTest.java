@@ -108,11 +108,8 @@ public class ElaDidServiceTest extends TestCase {
 
     @Test
     public void testPackDidRawData() throws Exception {
-        ReturnMsgEntity ret = didService.packDidRawData(didPrivateKey, didPropertyKey, didPropertyValue);
-        long status = ret.getStatus();
-        assertEquals("Err didService.packDidRawData failed. result:" + JSON.toJSONString(ret.getResult()), status, RetCodeConfiguration.SUCC);
-        String rawData = (String) ret.getResult();
-        assertNotNull(rawData);
+        String ret = didService.packDidRawData(didPrivateKey, didPropertyKey, didPropertyValue);
+        assertNotNull("Err didService.packDidRawData failed.", ret);
     }
 
     @Test
@@ -120,11 +117,8 @@ public class ElaDidServiceTest extends TestCase {
         Map<String, String> properties = new HashMap<>();
         properties.put("test1_key", "test1_value");
         properties.put("test2_key", "test2_value");
-        ReturnMsgEntity ret = didService.packDidRawData(didPrivateKey, properties);
-        long status = ret.getStatus();
-        assertEquals("Err didService.packDidRawData failed. result:" + JSON.toJSONString(ret.getResult()), status, RetCodeConfiguration.SUCC);
-        String rawData = (String) ret.getResult();
-        assertNotNull(rawData);
+        String ret = didService.packDidRawData(didPrivateKey, properties);
+        assertNotNull("Err didService.packDidRawData failed. ", ret);
     }
 
     @Test
