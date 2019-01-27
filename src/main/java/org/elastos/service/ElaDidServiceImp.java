@@ -43,6 +43,11 @@ public class ElaDidServiceImp implements ElaDidService {
     private static Logger logger = LoggerFactory.getLogger(ElaDidServiceImp.class);
 
     @Override
+    public void setElaNodeUrl(String nodeUrl) {
+        DidBackendService.setDidPreFix(nodeUrl);
+    }
+
+    @Override
     public ReturnMsgEntity createDid() {
         String didPrivateKey = Ela.getPrivateKey();
         System.out.println(didPrivateKey);

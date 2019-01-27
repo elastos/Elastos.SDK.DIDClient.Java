@@ -23,7 +23,7 @@ import java.util.Map;
 
 public class DidBackendService {
     private static Logger logger = LoggerFactory.getLogger(DidBackendService.class);
-    private static String didPreFix;
+    private static String didPreFix = null;
 
     private static final String getUtosByAddr = "/api/v1/asset/utxos/";
     private static final String transaction = "/api/v1/transaction";
@@ -32,9 +32,20 @@ public class DidBackendService {
         boolean ret = OutSideConfig.readOutSide();
         if (ret) {
             didPreFix = OutSideConfig.getObject("node.prefix");
-        } else {
-            didPreFix = "http://localhost:21334";
         }
+    }
+
+    public static void setDidPreFix(String didPreFix) {
+        DidBackendService.didPreFix = didPreFix;
+    }
+
+    public static String getDidPreFix() {
+        if (null == didPreFix) {
+            String msg = "There is no ela chain node url, please set it with API setElaNodeUrl or configuration file in \"./conf/ela.did.properties\".";
+            System.out.println(msg);
+            throw new NullPointerException(msg);
+        }
+        return didPreFix;
     }
 
     public enum ReqMethod {
@@ -57,7 +68,7 @@ public class DidBackendService {
 
         checkAddr(address);
 
-        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.GET, didPreFix + getUtosByAddr, address);
+        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.GET, getDidPreFix()+ getUtosByAddr, address);
         if (msgEntity.getStatus() == RetCodeConfiguration.SUCC) {
             try {
                 List<Map> data = (List<Map>) msgEntity.getResult();
@@ -82,12 +93,12 @@ public class DidBackendService {
 
         String jsonEntity = JSON.toJSONString(entity);
         System.out.println("tx send data:" + jsonEntity);
-        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.POST, didPreFix + transaction, jsonEntity);
+        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.POST, getDidPreFix()+ transaction, jsonEntity);
         return msgEntity;
     }
 
     public static Map<String, Object> getTransaction(String txId, ChainType type) {
-        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.GET, didPreFix + transaction, txId);
+        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.GET, getDidPreFix()+ transaction, txId);
 
         if (msgEntity.getStatus() == RetCodeConfiguration.SUCC) {
             return (Map<String, Object>) msgEntity.getResult();

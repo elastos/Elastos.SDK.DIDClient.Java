@@ -35,7 +35,7 @@ public class ElaDidServiceApiSample {
         didProperty.add("Mac");
         didProperty.add("Thinkpad");
         didPropertyValue = JSON.toJSONString(didProperty);
-
+        didService.setElaNodeUrl("http://localhost:21334");
     }
 
     public void createDid() throws Exception {
@@ -177,5 +177,4 @@ public class ElaDidServiceApiSample {
 //        sample.deleteDidProperty();
 //        sample.deleteDid();
     }
-
 }

@@ -11,6 +11,10 @@ import org.elastos.entity.ReturnMsgEntity;
 import java.util.Map;
 
 public interface ElaDidService {
+
+    //设定上链的节点地址
+    void setElaNodeUrl(String url);
+
     //创建DID
     //已实现
     ReturnMsgEntity createDid();
