@@ -126,13 +126,22 @@ public class ElaDidServiceImp implements ElaDidService {
     }
 
     @Override
-    public ReturnMsgEntity getDid(String didPrivateKey) {
+    public String getDid(String didPrivateKey) {
         if (StringUtils.isBlank(didPrivateKey)) {
-            return new ReturnMsgEntity().setResult("Err: getDid Parameter invalid.").setStatus(RetCodeConfiguration.BAD_REQUEST);
+            return null;
         }
         String did = Ela.getIdentityIDFromPrivate(didPrivateKey);
         System.out.println("getDid:" + did);
-        return new ReturnMsgEntity().setResult(did).setStatus(RetCodeConfiguration.SUCC);
+        return did;
+    }
+
+    @Override
+    public String getDidFromPublicKey(String publicKey) {
+        if (StringUtils.isBlank(publicKey)) {
+            return null;
+        }
+        String did = ElaKit.getIdentityFromPublicKey(publicKey);
+        return did;
     }
 
     @Override

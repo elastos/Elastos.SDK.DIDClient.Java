@@ -88,14 +88,11 @@ public class ElaDidServiceApiSample {
     }
 
     public void getDid() throws Exception {
-        ReturnMsgEntity ret = didService.getDid(didPrivateKey);
-        long status = ret.getStatus();
-        if (status != RetCodeConfiguration.SUCC) {
-            System.out.println("Err didService.getDid failed. result:" + JSON.toJSONString(ret.getResult()));
+        String did = didService.getDid(didPrivateKey);
+        if (null == did) {
+            System.out.println("Err didService.getDid failed. result:");
             return;
         }
-        String id = (String) ret.getResult();
-        System.out.println("DidService.getDidPublicKey id:" + id);
     }
 
     public void packDidRawData() throws Exception {

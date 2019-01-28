@@ -96,15 +96,24 @@ ElaDidService didService = new ElaDidServiceImp();
 * Get did from  did private key.
 
 ```Java
-    ReturnMsgEntity ret = didService.getDid(didPrivateKey);
-    long status = ret.getStatus();
-    if (status != RetCodeConfiguration.SUCC) {
-        System.out.println("Err didService.getDid failed. result:" + JSON.toJSONString(ret.getResult()));
+    String did = didService.getDid(didPrivateKey);
+    if (null == did) {
+        System.out.println("Err didService.getDidFromPublicKey failed.";
         return;
     }
-    String id = (String) ret.getResult();
 ```
 
+## getDidFromPublicKey
+**String getDidFromPublicKey(String publicKey);**
+* Get did from  did private key.
+
+```Java
+    String did = didService.getDidFromPublicKey(didPubKey);
+    if (null == did) {
+        System.out.println("Err didService.getDidFromPublicKey failed.";
+        return;
+    }
+```
 ## packDidRawData
 **ReturnMsgEntity packDidRawData(String didPrivateKey, String propertyKey, String propertyData);**
 * Pack a raw data which can be send to [did chain service](https://github.com/elastos/Elastos.ORG.DID.Service/tree/did_chain_service) to record.

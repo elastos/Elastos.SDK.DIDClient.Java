@@ -99,11 +99,8 @@ public class ElaDidServiceTest extends TestCase {
 
     @Test
     public void testGetDid() throws Exception {
-        ReturnMsgEntity ret = didService.getDid(didPrivateKey);
-        long status = ret.getStatus();
-        assertEquals("Err didService.getDid failed. result:" + JSON.toJSONString(ret.getResult()), status, RetCodeConfiguration.SUCC);
-        String id = (String) ret.getResult();
-        assertEquals("Err didService.getDid not right. result:" + JSON.toJSONString(ret.getResult()), id, did);
+        String did = didService.getDid(didPrivateKey);
+        assertNotNull(did);
     }
 
     @Test
