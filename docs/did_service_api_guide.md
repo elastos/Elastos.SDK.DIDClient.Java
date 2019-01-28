@@ -12,6 +12,10 @@ import org.elastos.service.*;
 ElaDidService didService = new ElaDidServiceImp();
 ```
 
+## setElaNodeUrl
+**void setElaNodeUrl(String url);**
+* Set elastos chain node url.
+
 ## createDid
 **ReturnMsgEntity createDid();**
 * Create a did, return a did private key, a public key and a did.

@@ -31,4 +31,4 @@ So first you should configure those API to node with the configuration file ./co
 
 ## DID Service API
 
-Please see it in https://did-service-api.readthedocs.io/en/refactor_frontend/
+Please see it in this (doc.)[https://did-client-java-api.readthedocs.io/en/latest/did_service_api_guide/]
