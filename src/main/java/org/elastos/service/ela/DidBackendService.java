@@ -98,7 +98,7 @@ public class DidBackendService {
     }
 
     public static Map<String, Object> getTransaction(String txId, ChainType type) {
-        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.GET, getDidPreFix()+ transaction, txId);
+        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.GET, getDidPreFix()+ transaction+"/", txId);
 
         if (msgEntity.getStatus() == RetCodeConfiguration.SUCC) {
             return (Map<String, Object>) msgEntity.getResult();

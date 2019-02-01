@@ -29,13 +29,15 @@ public class ElaDidServiceApiSample {
     String didPropertyValue;
 
     public ElaDidServiceApiSample() {
-        didPropertyKey = "my_notebooks";
+        didPropertyKey = "中文my_notebooks";
         List<String> didProperty = new ArrayList<>();
-        didProperty.add("Dell");
-        didProperty.add("Mac");
+        didProperty.add("Dell中文");
+        didProperty.add("中学Mac");
         didProperty.add("Thinkpad");
         didPropertyValue = JSON.toJSONString(didProperty);
-        didService.setElaNodeUrl("http://localhost:21334");
+        didService.setElaNodeUrl("http://54.64.220.165:21334");
+//        didService.setElaNodeUrl("http://localhost:21334");
+//        didService.setElaNodeUrl("http://52.197.53.77:20604");
     }
 
     public void createDid() throws Exception {
@@ -115,7 +117,7 @@ public class ElaDidServiceApiSample {
         String txId = (String) ret.getResult();
 
         //wait 4 minutes for info add on chain!!
-        TimeUnit.MINUTES.sleep(4);
+//        TimeUnit.MINUTES.sleep(4);
 
         ret = didService.getDidPropertyByTxId(did, didPropertyKey, txId);
         status = ret.getStatus();
@@ -126,6 +128,14 @@ public class ElaDidServiceApiSample {
         String propertyJson = (String) ret.getResult();
         String property = JSONObject.parseObject(propertyJson).getString(didPropertyKey);
         System.out.println("Err didService.getDidPropertyByTxId property:" + property);
+    }
+    public void getDidProperty() throws Exception {
+        ReturnMsgEntity ret = didService.getDidPropertyByTxId("iV8D3SfqUZUomodfmarPHdnfCScnNMgipJ", "中文", "c80c10cb1412e2d013534da709dedc821b2e6dc2effd7c2896829c52c7064f7c");
+        long status = ret.getStatus();
+        if (status != RetCodeConfiguration.SUCC) {
+            System.out.println("Err didService.getDidPropertyByTxId failed. result:" + JSON.toJSONString(ret.getResult()));
+            return;
+        }
     }
 
     public void deleteDidProperty() throws Exception {
@@ -165,13 +175,14 @@ public class ElaDidServiceApiSample {
 
     public final static void main(String[] args) throws Exception {
         ElaDidServiceApiSample sample = new ElaDidServiceApiSample();
-        sample.createDid();
+//        sample.createDid();
 //        sample.getPublicKey();
 //        sample.getDid();
 //        sample.signAndVerifyDidMessage();
-        sample.packDidRawData();
+//        sample.packDidRawData();
 //        sample.setAndGetDidProperty();
 //        sample.deleteDidProperty();
 //        sample.deleteDid();
+        sample.getDidProperty();
     }
 }
