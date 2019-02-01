@@ -52,7 +52,7 @@ public class DidEntity {
     String Did;
     DidStatus Status = DidStatus.Normal;
     String Ver = "1.0";
-    List<DidProperty> properties;
+    List<DidProperty> Properties;
 
     public String getDid() {
         return Did;
@@ -83,11 +83,11 @@ public class DidEntity {
     }
 
     public List<DidProperty> getProperties() {
-        return properties;
+        return Properties;
     }
 
     public void setProperties(List<DidProperty> properties) {
-        this.properties = properties;
+        this.Properties = properties;
     }
 
 }
