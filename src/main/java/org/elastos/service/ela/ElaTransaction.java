@@ -108,7 +108,6 @@ public class ElaTransaction {
 
         if (receiverList.isEmpty()
                 || senderList.isEmpty()
-                || null == memo
                 || null == chainType
                 || null == totalFee) {
             throw new RuntimeException("Not enough transaction parameter");

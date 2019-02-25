@@ -432,6 +432,33 @@ public class ElaDidServiceImp implements ElaDidService {
         return null;
     }
 
+
+    public ReturnMsgEntity transferEla(List<String> srcPrivateKeys, Map<String, Double> dstAddrAndEla, ChainType chainType) {
+
+
+        ElaTransaction transaction = new ElaTransaction(chainType, "");
+
+
+        for (String key : srcPrivateKeys) {
+            String sendAddr = Ela.getAddressFromPrivate(key);
+            transaction.addSender(sendAddr, key);
+        }
+
+        for (Map.Entry<String, Double> entry : dstAddrAndEla.entrySet()) {
+            transaction.addReceiver(entry.getKey(), entry.getValue());
+        }
+
+        ReturnMsgEntity ret;
+        try {
+            ret = transaction.transfer();
+        } catch (Exception e) {
+            e.printStackTrace();
+            ret = new ReturnMsgEntity().setResult("Err: transferEla transfer failed").setStatus(RetCodeConfiguration.PROCESS_ERROR);
+        }
+
+        return ret;
+    }
+
     /**
      * using privateKey sign data
      *

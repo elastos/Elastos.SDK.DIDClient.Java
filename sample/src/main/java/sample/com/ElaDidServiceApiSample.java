@@ -3,6 +3,7 @@ package sample.com;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.elastos.conf.RetCodeConfiguration;
+import org.elastos.entity.ChainType;
 import org.elastos.entity.ReturnMsgEntity;
 import org.elastos.service.ElaDidService;
 import org.elastos.service.ElaDidServiceImp;
@@ -10,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +39,6 @@ public class ElaDidServiceApiSample {
         didPropertyValue = JSON.toJSONString(didProperty);
         didService.setElaNodeUrl("http://54.64.220.165:21334");
 //        didService.setElaNodeUrl("http://localhost:21334");
-//        didService.setElaNodeUrl("http://52.197.53.77:20604");
     }
 
     public void createDid() throws Exception {
@@ -172,6 +173,15 @@ public class ElaDidServiceApiSample {
         System.out.println("Status:" + status + " result:" + ret.getResult());
     }
 
+    public void transferEla(){
+        ElaDidServiceImp elaDidService = new ElaDidServiceImp();
+        elaDidService.setElaNodeUrl("http://54.64.220.165:21334");
+        Map<String, Double> dst = new HashMap<>();
+        dst.put("ETLde1cpZJ8pgyrFUg7yjszQu26GJfzZ6C", 8.0);
+        List<String> srcPrivateKeys = new ArrayList<>();
+        srcPrivateKeys.add("96A10CEEAA43C7E93F122BDE8F84DB336DA4F6CEA92341E15864B390E1EB266D");
+        ReturnMsgEntity ret = elaDidService.transferEla(srcPrivateKeys, dst, ChainType.MAIN_CHAIN);
+    }
 
     public final static void main(String[] args) throws Exception {
         ElaDidServiceApiSample sample = new ElaDidServiceApiSample();
@@ -183,6 +193,7 @@ public class ElaDidServiceApiSample {
 //        sample.setAndGetDidProperty();
 //        sample.deleteDidProperty();
 //        sample.deleteDid();
-        sample.getDidProperty();
+//        sample.getDidProperty();
+        sample.transferEla();
     }
 }
