@@ -39,7 +39,7 @@ public class ElaTransaction {
             chainType = type;
             utxoList = DidBackendService.getUtxoListByAddr(address, type);
             if (utxoList == null) {
-                throw new ApiRequestDataException(Errors.NOT_ENOUGH_UTXO.val());
+                utxoList = new ArrayList<>();
             }
         }
     }
