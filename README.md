@@ -20,7 +20,7 @@ With Maven：
 <dependency>
     <groupId>org.elastos</groupId>
     <artifactId>did_client.lib</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.3</version>
 </dependency>
 ```
 
