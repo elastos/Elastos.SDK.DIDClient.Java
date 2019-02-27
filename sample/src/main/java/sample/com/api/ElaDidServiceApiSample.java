@@ -1,4 +1,4 @@
-package sample.com;
+package sample.com.api;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -42,51 +42,34 @@ public class ElaDidServiceApiSample {
     }
 
     public void createDid() throws Exception {
-        ReturnMsgEntity ret = didService.createDid();
-        long status = ret.getStatus();
-        if (status != RetCodeConfiguration.SUCC) {
-            System.out.println("Err didService.createDid failed. result:" + JSON.toJSONString(ret.getResult()));
-            return;
-        }
-
-        Map data = JSON.parseObject((String) ret.getResult(), Map.class);
+        String ret = didService.createDid();
+        Map data = JSON.parseObject(ret, Map.class);
         didPrivateKey = (String) data.get("DidPrivateKey");
         did = (String) data.get("DID");
         didPublicKey = (String) data.get("DidPublicKey");
     }
 
     public void signAndVerifyDidMessage() throws Exception {
-        ReturnMsgEntity ret = didService.signDidMessage(didPrivateKey, didPropertyKey);
-        long status = ret.getStatus();
-        if (status != RetCodeConfiguration.SUCC) {
-            System.out.println("Err didService.signDidMessage failed. result:" + JSON.toJSONString(ret.getResult()));
-            return;
-        }
-        String sig = (String) ret.getResult();
-
-        ret = didService.verifyDidMessage(didPublicKey, sig, didPropertyKey);
-        status = ret.getStatus();
-        if (status != RetCodeConfiguration.SUCC) {
-            System.out.println("Err didService.verifyDidMessage failed. result:" + JSON.toJSONString(ret.getResult()));
+        String sig = didService.signDidMessage(didPrivateKey, didPropertyKey);
+        if (null == sig) {
+            System.out.println("Err didService.signDidMessage failed.");
             return;
         }
 
-        Boolean isVerify = (Boolean) ret.getResult();
+        boolean isVerify = didService.verifyDidMessage(didPublicKey, sig, didPropertyKey);
         if (!isVerify) {
-            System.out.println("Err didService.verifyDidMessage not right. result:" + JSON.toJSONString(ret.getResult()));
+            System.out.println("Err didService.verifyDidMessage not right. result:");
             return;
         }
     }
 
     public void getPublicKey() throws Exception {
-        ReturnMsgEntity ret = didService.getDidPublicKey(didPrivateKey);
-        long status = ret.getStatus();
-        if (status != RetCodeConfiguration.SUCC) {
-            System.out.println("Err didService.getDidPublicKey failed. result:" + JSON.toJSONString(ret.getResult()));
+        String pubKey = didService.getDidPublicKey(didPrivateKey);
+        if (null == pubKey) {
+            System.out.println("Err didService.getDidPublicKey failed. result:");
             return;
         }
 
-        String pubKey = (String) ret.getResult();
         System.out.println("DidService.getDidPublicKey pubKey:" + pubKey);
     }
 
@@ -183,7 +166,7 @@ public class ElaDidServiceApiSample {
         ReturnMsgEntity ret = elaDidService.transferEla(srcPrivateKeys, dst, ChainType.MAIN_CHAIN);
     }
 
-    public final static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
         ElaDidServiceApiSample sample = new ElaDidServiceApiSample();
 //        sample.createDid();
 //        sample.getPublicKey();

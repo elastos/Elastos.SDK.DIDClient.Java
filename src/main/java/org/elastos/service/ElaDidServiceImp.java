@@ -48,7 +48,7 @@ public class ElaDidServiceImp implements ElaDidService {
     }
 
     @Override
-    public ReturnMsgEntity createDid() {
+    public String createDid() {
         String didPrivateKey = Ela.getPrivateKey();
         System.out.println(didPrivateKey);
         String did = Ela.getIdentityIDFromPrivate(didPrivateKey);
@@ -61,7 +61,7 @@ public class ElaDidServiceImp implements ElaDidService {
         result.put("DID", did);
         result.put("DidPublicKey", didPublicKey);
 
-        return new ReturnMsgEntity().setResult(JSON.toJSONString(result)).setStatus(RetCodeConfiguration.SUCC);
+        return JSON.toJSONString(result);
     }
 
     @Override
@@ -80,49 +80,55 @@ public class ElaDidServiceImp implements ElaDidService {
     }
 
     @Override
-    public ReturnMsgEntity signDidMessage(String didPrivateKey, String msg) {
+    public String signDidMessage(String didPrivateKey, String msg) {
         if (StringUtils.isAnyBlank(didPrivateKey,
                 msg)) {
-            return new ReturnMsgEntity().setResult("Err: signDidMessage Parameter invalid.").setStatus(RetCodeConfiguration.BAD_REQUEST);
+            logger.error("Err: signDidMessage Parameter invalid.");
+            return null;
         }
 
         Map<String, Object> signDid;
         try {
             signDid = this.sign(didPrivateKey, msg);
         } catch (Exception e) {
-            return new ReturnMsgEntity().setResult("Err: signDidMessage failed").setStatus(RetCodeConfiguration.PROCESS_ERROR);
+            logger.error("Err: signDidMessage failed.");
+            return null;
+
         }
         logger.debug("signDidMessage signDid:{}", JSON.toJSONString(signDid));
         String sig = (String) signDid.get("sig");
-        return new ReturnMsgEntity().setResult(sig).setStatus(RetCodeConfiguration.SUCC);
+        return sig;
     }
 
     @Override
-    public ReturnMsgEntity verifyDidMessage(String didPublicKey, String sig, String msg) {
+    public boolean verifyDidMessage(String didPublicKey, String sig, String msg) {
         if (StringUtils.isAnyBlank(didPublicKey,
                 msg,
                 sig)) {
-            return new ReturnMsgEntity().setResult("Err: verifyDidMessage Parameter invalid.").setStatus(RetCodeConfiguration.BAD_REQUEST);
+            logger.error("Err: verifyDidMessage Parameter invalid.");
+            return false;
         }
 
         try {
             String hexmsg = DatatypeConverter.printHexBinary(msg.getBytes(CHARSET));
             boolean ret = this.verify(didPublicKey, sig, hexmsg);
-            return new ReturnMsgEntity().setResult(ret).setStatus(RetCodeConfiguration.SUCC);
+            return ret;
         } catch (Exception e) {
-            return new ReturnMsgEntity().setResult("Err: verifyDidMessage failed").setStatus(RetCodeConfiguration.PROCESS_ERROR);
+            logger.error("Err: verifyDidMessage failed.");
+            return false;
         }
     }
 
     @Override
-    public ReturnMsgEntity getDidPublicKey(String didPrivateKey) {
+    public String getDidPublicKey(String didPrivateKey) {
         if (StringUtils.isBlank(didPrivateKey)) {
-            return new ReturnMsgEntity().setResult("Err: getDidPublicKey Parameter invalid.").setStatus(RetCodeConfiguration.BAD_REQUEST);
+            logger.error("Err: getDidPublicKey Parameter invalid.");
+            return null;
         }
 
         String didPublicKey = Ela.getPublicFromPrivate(didPrivateKey);
         System.out.println("getDidPublicKey:" + didPublicKey);
-        return new ReturnMsgEntity().setResult(didPublicKey).setStatus(RetCodeConfiguration.SUCC);
+        return didPublicKey;
     }
 
     @Override
@@ -168,10 +174,8 @@ public class ElaDidServiceImp implements ElaDidService {
         if (null == raw) {
             logger.error("Err: packDidRawData packRawDid failed");
             System.out.println("Err: packDidRawData packRawDid failed");
-            return null;
-        } else {
-            return raw;
         }
+        return raw;
     }
 
     @Override
@@ -194,10 +198,8 @@ public class ElaDidServiceImp implements ElaDidService {
         if (null == raw) {
             logger.error("Err: packDidRawData packRawDid failed");
             System.out.println("Err: packDidRawData packRawDid failed");
-            return null;
-        } else {
-            return raw;
         }
+        return raw;
     }
 
     private void propertiesMapToList(Map<String, String> propertiesMap, List<DidEntity.DidProperty> properties) {

@@ -17,20 +17,15 @@ ElaDidService didService = new ElaDidServiceImp();
 * Set elastos chain node url.
 
 ## createDid
-**ReturnMsgEntity createDid();**
+**String createDid();**
 * Create a did, return a did private key, a public key and a did.
 
 ```Java
-    ReturnMsgEntity ret = didService.createDid();
-    long status = ret.getStatus();
-    if( status != RetCodeConfiguration.SUCC){
-        System.out.println("Err didService.createDid failed. result:" + JSON.toJSONString(ret.getResult()));
-        return;
-    }
-    Map data = JSON.parseObject((String) ret.getResult(), Map.class);
-    didPrivateKey = (String) data.get("DidPrivateKey");
-    did = (String) data.get("DID");
-    didPublicKey = (String) data.get("DidPublicKey");
+        String ret = didService.createDid();
+        Map data = JSON.parseObject(ret, Map.class);
+        didPrivateKey = (String) data.get("DidPrivateKey");
+        did = (String) data.get("DID");
+        didPublicKey = (String) data.get("DidPublicKey");
 ```
 
 ## destroyDid
@@ -48,51 +43,43 @@ ElaDidService didService = new ElaDidServiceImp();
 ```
 
 ## signDidMessage
-**ReturnMsgEntity signDidMessage(String didPrivateKey, String msg);**
+**String signDidMessage(String didPrivateKey, String msg);**
 * Sign msg with did private key.
 
 ```java
-    ReturnMsgEntity ret = didService.signDidMessage(didPrivateKey, msg);
-    long status = ret.getStatus();
-    if( status != RetCodeConfiguration.SUCC){
-        System.out.println("Err didService.signDidMessage failed. result:" + JSON.toJSONString(ret.getResult()));
+    String sig = didService.signDidMessage(didPrivateKey, didPropertyKey);
+    if (null == sig) {
+        System.out.println("Err didService.signDidMessage failed.");
         return;
     }
-    String sig = (String) ret.getResult();
 ```
 
 ## verifyDidMessage
-**ReturnMsgEntity verifyDidMessage(String didPublicKey, String sig, String msg);**
+**boolean verifyDidMessage(String didPublicKey, String sig, String msg);**
 * Verify the sig with did public key.
 
 ```Java
-    ReturnMsgEntity ret = didService.verifyDidMessage(didPublicKey, sig, msg);
-    long status = ret.getStatus();
-    if (status != RetCodeConfiguration.SUCC) {
-        System.out.println("Err didService.verifyDidMessage failed. result:" + JSON.toJSONString(ret.getResult()));
+    boolean isVerify = didService.verifyDidMessage(didPublicKey, sig, didPropertyKey);
+    if (!isVerify) {
+        System.out.println("Err didService.verifyDidMessage not right. result:");
         return;
     }
-
-    Boolean isVerify = (Boolean) ret.getResult();
 ```
 
 ## getDidPublicKey
-**ReturnMsgEntity getDidPublicKey(String didPrivateKey);**
+**String getDidPublicKey(String didPrivateKey);**
 * Get did public key from did private key.
 
 ```Java
-    ReturnMsgEntity ret = didService.getDidPublicKey(didPrivateKey);
-    long status = ret.getStatus();
-    if (status != RetCodeConfiguration.SUCC) {
-        System.out.println("Err didService.getDidPublicKey failed. result:" + JSON.toJSONString(ret.getResult()));
+    String ret = didService.getDidPublicKey(didPrivateKey);
+    if (null == pubKey) {
+        System.out.println("Err didService.getDidPublicKey failed. result:");
         return;
     }
-
-    String pubKey = (String) ret.getResult();
 ```
 
 ## getDid
-**ReturnMsgEntity getDid(String didPrivateKey);**
+**String getDid(String didPrivateKey);**
 * Get did from  did private key.
 
 ```Java
@@ -115,17 +102,16 @@ ElaDidService didService = new ElaDidServiceImp();
     }
 ```
 ## packDidRawData
-**ReturnMsgEntity packDidRawData(String didPrivateKey, String propertyKey, String propertyData);**
+**String packDidRawData(String didPrivateKey, String propertyKey, String propertyData);**
 * Pack a raw data which can be send to [did chain service](https://github.com/elastos/Elastos.ORG.DID.Service/tree/did_chain_service) to record.
 
 ```Java
-    ReturnMsgEntity ret = didService.packDidRawData(didPrivateKey, didPropertyKey, didPropertyValue);
-    long status = ret.getStatus();
-    if (status != RetCodeConfiguration.SUCC) {
-        System.out.println("Err didService.packDidRawData failed. result:" + JSON.toJSONString(ret.getResult()));
+    String ret = didService.packDidRawData(didPrivateKey, didPropertyKey, didPropertyValue);
+    if (null == rawData) {
+        System.out.println("Err didService.packDidRawData failed.");
         return;
     }
-    String rawData = (String) ret.getResult();
+    System.out.println("DidService.packDidRawData rawData:" + rawData);
 ```
 
 ## setDidProperty

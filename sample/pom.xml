@@ -16,11 +16,30 @@
             <version>1.2.51</version>
         </dependency>
 
-        <!--使用非maven jar包,并且指定包-->
+
         <dependency>
             <groupId>org.elastos</groupId>
             <artifactId>did_client.lib</artifactId>
             <version>0.0.3</version>
+        </dependency>
+
+        <!--shiro-->
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-core</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+
+        <!--http-->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.4.1</version>
         </dependency>
     </dependencies>
 
@@ -47,7 +66,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>sample.com.ElaDidServiceApiSample</mainClass>
+                            <mainClass>sample.com.api.ElaDidServiceApiSample</mainClass>
                         </manifest>
 
                     </archive>

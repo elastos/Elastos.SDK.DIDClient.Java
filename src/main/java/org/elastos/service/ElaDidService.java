@@ -16,19 +16,19 @@ public interface ElaDidService {
     void setElaNodeUrl(String url);
 
     //创建DID
-    ReturnMsgEntity createDid();
+    String createDid();
 
     //注销DID，该操作不可撤销。在did上有特殊属性来验证状态。 必须要注意，已经注销的did不能操作以下任何服务功能
     ReturnMsgEntity destroyDid(String payWalletPrivateKey, String didPrivateKey);
 
     //使用DID签名数据
-    ReturnMsgEntity signDidMessage(String didPrivateKey, String msg);
+    String signDidMessage(String didPrivateKey, String msg);
 
     //验证DID签名
-    ReturnMsgEntity verifyDidMessage(String didPublicKey, String sig, String msg);
+    boolean verifyDidMessage(String didPublicKey, String sig, String msg);
 
     //获取DID公钥
-    ReturnMsgEntity getDidPublicKey(String didPrivateKey);
+    String getDidPublicKey(String didPrivateKey);
 
     //获取DID
     String getDid(String didPrivateKey);

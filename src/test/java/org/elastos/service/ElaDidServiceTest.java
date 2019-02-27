@@ -55,11 +55,10 @@ public class ElaDidServiceTest extends TestCase {
 
     @Test
     public void testDidCteate() throws Exception {
-        ReturnMsgEntity ret = didService.createDid();
-        long status = ret.getStatus();
-        assertEquals("Err didService.createDid failed. result:" + JSON.toJSONString(ret.getResult()), status, RetCodeConfiguration.SUCC);
+        String ret = didService.createDid();
+        assertNotNull(ret);
 
-        Map data = JSON.parseObject((String) ret.getResult(), Map.class);
+        Map data = JSON.parseObject(ret, Map.class);
         didPrivateKey = (String) data.get("DidPrivateKey");
         did = (String) data.get("DID");
         didPublicKey = (String) data.get("DidPublicKey");
@@ -67,34 +66,20 @@ public class ElaDidServiceTest extends TestCase {
 
     @Test
     public void testSignAndVertifyDidMessage() throws Exception {
-        ReturnMsgEntity ret = didService.signDidMessage(didPrivateKey, didPropertyKey);
-        long status = ret.getStatus();
-        assertEquals("Err didService.signDidMessage failed. result:" + JSON.toJSONString(ret.getResult()), status, RetCodeConfiguration.SUCC);
-        String sig = (String) ret.getResult();
+        String sig = didService.signDidMessage(didPrivateKey, didPropertyKey);
+        assertNotNull(sig);
 
-        ret = didService.verifyDidMessage(didPublicKey, sig, didPropertyKey);
-        status = ret.getStatus();
-        assertEquals("Err didService.verifyDidMessage failed. result:" + JSON.toJSONString(ret.getResult()), status, RetCodeConfiguration.SUCC);
-
-        Boolean isVertify = (Boolean) ret.getResult();
-        assertTrue("Err didService.verifyDidMessage not right. result:" + JSON.toJSONString(ret.getResult()), isVertify);
+        boolean ret = didService.verifyDidMessage(didPublicKey, sig, didPropertyKey);
+        assertTrue(ret);
 
         ret = didService.verifyDidMessage(didPublicKey, sig, "just for test string");
-        status = ret.getStatus();
-        assertEquals("Err didService.verifyDidMessage failed. result:" + JSON.toJSONString(ret.getResult()), status, RetCodeConfiguration.SUCC);
-
-        isVertify = (Boolean) ret.getResult();
-        assertTrue("Err didService.verifyDidMessage not right. result:" + JSON.toJSONString(ret.getResult()), !isVertify);
-
+        assertTrue(!ret);
     }
 
     @Test
     public void testGetPublicKey() throws Exception {
-        ReturnMsgEntity ret = didService.getDidPublicKey(didPrivateKey);
-        long status = ret.getStatus();
-        assertEquals("Err didService.getDidPublicKey failed. result:" + JSON.toJSONString(ret.getResult()), status, RetCodeConfiguration.SUCC);
-        String pubKey = (String) ret.getResult();
-        assertEquals("Err didService.getDidPublicKey not right. result:" + JSON.toJSONString(ret.getResult()), pubKey, didPublicKey);
+        String  pubKey = didService.getDidPublicKey(didPrivateKey);
+        assertEquals("Err didService.getDidPublicKey not right", pubKey, didPublicKey);
     }
 
     @Test
