@@ -1,13 +1,5 @@
 package sample.com.util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -20,6 +12,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -30,6 +23,19 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Http请求
  *
@@ -38,12 +44,36 @@ public class HttpUtil {
 
     private static Logger logger = LoggerFactory.getLogger(HttpUtil.class);
 
-    public static CloseableHttpClient createHttpClient(){
+    private static class TrustAnyTrustManager implements X509TrustManager {
+        private TrustAnyTrustManager() {
+        }
+
+        public X509Certificate[] getAcceptedIssuers() {
+            return null;
+        }
+
+        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        }
+
+        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        }
+    }
+
+    public static CloseableHttpClient createHttpClient() throws Exception {
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        TrustManager[] tm = new TrustManager[]{new HttpUtil.TrustAnyTrustManager()};
+        sslContext.init(null, tm, new SecureRandom());
+        SSLConnectionSocketFactory sslConnectionFactory = new SSLConnectionSocketFactory(
+                sslContext,
+                new String[]{"TLSv1.2","TLSv1","TLSv1.1","SSLv3"},
+                null,
+                NoopHostnameVerifier.INSTANCE);
+
         BasicHttpClientConnectionManager connManager;
         connManager = new BasicHttpClientConnectionManager(
                 RegistryBuilder.<ConnectionSocketFactory>create()
                         .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                        .register("https", SSLConnectionSocketFactory.getSocketFactory())
+                        .register("https", sslConnectionFactory)
                         .build(),
                 null,
                 null,
@@ -80,7 +110,7 @@ public class HttpUtil {
                 return result;
             }
         }
-        catch (IOException e) {
+        catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -140,6 +170,7 @@ public class HttpUtil {
      * @return
      */
     public static String post(String url, String params, Map<String, String> headers){
+        try {
         CloseableHttpClient httpclient = HttpUtil.createHttpClient();
         HttpPost httpPost = new HttpPost(url);
         httpPost.setHeader("Accept", "application/json");
@@ -152,7 +183,6 @@ public class HttpUtil {
         StringEntity entity = new StringEntity(params, StandardCharsets.UTF_8);
         httpPost.setEntity(entity);
         CloseableHttpResponse response = null;
-        try {
             response = httpclient.execute(httpPost);
             int code = response.getStatusLine().getStatusCode();
             logger.info("post URL：" + url + ";code："+ code);
