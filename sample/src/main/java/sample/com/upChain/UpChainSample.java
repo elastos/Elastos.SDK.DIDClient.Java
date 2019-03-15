@@ -97,24 +97,29 @@ public class UpChainSample {
     }
 
     public static void main(String[] args) throws Exception {
+
+        for (String a : args) {
+            System.out.println("****************Is:"+a);
+        }
+
         UpChainSample sample = new UpChainSample();
 
         sample.createDid();
 
-        String upChainDataKey = "My_notebooks";
-        List<String> didProperty = new ArrayList<>();
-        didProperty.add("Dell中文");
-        didProperty.add("Mac中文");
-        didProperty.add("Thinkpad中文");
-        String upChainDataValue = JSON.toJSONString(didProperty);
+//        String upChainDataKey = "My_notebooks";
+//        List<String> didProperty = new ArrayList<>();
+//        didProperty.add("Dell中文");
+//        didProperty.add("Mac中文");
+//        didProperty.add("Thinkpad中文");
+//        String upChainDataValue = JSON.toJSONString(didProperty);
 
-        String rawData = sample.packDidRawData(upChainDataKey, upChainDataValue);
+//        String rawData = sample.packDidRawData(upChainDataKey, upChainDataValue);
 
-        sample.putDataToElaChain(rawData);
-
-        //wait 3 minutes for info add on chain!!
-        TimeUnit.MINUTES.sleep(4);
-
-        String value = sample.getDataFromElaChain(upChainDataKey);
+//        sample.putDataToElaChain(rawData);
+//
+//        //wait 3 minutes for info add on chain!!
+//        TimeUnit.MINUTES.sleep(4);
+//
+//        String value = sample.getDataFromElaChain(upChainDataKey);
     }
 }

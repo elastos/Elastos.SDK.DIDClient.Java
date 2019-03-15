@@ -15,7 +15,14 @@ public interface ElaDidService {
     //设定上链的节点地址
     void setElaNodeUrl(String url);
 
+    //创建DID助记词
+    String createDidMnemonic();
+
+    //通过助记词创建DID
+    String createDidByMnemonic(String Mnemonic);
+
     //创建DID
+    @Deprecated
     String createDid();
 
     //注销DID，该操作不可撤销。在did上有特殊属性来验证状态。 必须要注意，已经注销的did不能操作以下任何服务功能

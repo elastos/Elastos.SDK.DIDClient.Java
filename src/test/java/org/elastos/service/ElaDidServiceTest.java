@@ -54,6 +54,31 @@ public class ElaDidServiceTest extends TestCase {
     }
 
     @Test
+    public void testMnemonicDidCteate() throws Exception {
+        String Mnemonic = didService.createDidMnemonic();
+        assertNotNull(Mnemonic);
+
+        String ret = didService.createDidByMnemonic(Mnemonic);
+        Map data = JSON.parseObject(ret, Map.class);
+        didPrivateKey = (String) data.get("DidPrivateKey");
+        did = (String) data.get("DID");
+        didPublicKey = (String) data.get("DidPublicKey");
+    }
+
+    @Test
+    public void testMnemonicDidCteate2() throws Exception {
+        String Mnemonic = "abandon people pact bargain blush rack entire dirt resist damage joke fold";
+
+        String ret = didService.createDidByMnemonic(Mnemonic);
+        Map data = JSON.parseObject(ret, Map.class);
+        didPrivateKey = (String) data.get("DidPrivateKey");
+        did = (String) data.get("DID");
+        didPublicKey = (String) data.get("DidPublicKey");
+    }
+
+
+
+    @Test
     public void testDidCteate() throws Exception {
         String ret = didService.createDid();
         assertNotNull(ret);

@@ -6,7 +6,7 @@
 
   <groupId>org.elastos</groupId>
   <artifactId>did_client.lib</artifactId>
-  <version>0.0.3</version>
+  <version>0.0.4</version>
 
   <name>did_client.lib</name>
   <description>DID service client library</description>
@@ -56,7 +56,7 @@
     <dependency>
         <groupId>org.elastos</groupId>
         <artifactId>wallet.lib</artifactId>
-        <version>0.0.7</version>
+        <version>0.0.9</version>
     </dependency>
     <dependency>
         <groupId>org.apache.commons</groupId>

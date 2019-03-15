@@ -21,17 +21,22 @@ import org.elastos.ela.SignTool;
 import org.elastos.ela.Util;
 import org.elastos.entity.ChainType;
 import org.elastos.entity.Errors;
+import org.elastos.entity.MnemonicType;
 import org.elastos.entity.ReturnMsgEntity;
 import org.elastos.service.ela.DidBackendService;
 import org.elastos.service.ela.ElaTransaction;
+import org.elastos.util.ela.ElaHdSupport;
 import org.elastos.util.ela.ElaKit;
 import org.elastos.util.ela.ElaSignTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.web3j.crypto.CipherException;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +50,37 @@ public class ElaDidServiceImp implements ElaDidService {
     @Override
     public void setElaNodeUrl(String nodeUrl) {
         DidBackendService.setDidPreFix(nodeUrl);
+    }
+
+    @Override
+    public String createDidMnemonic() {
+        String mnemonic = ElaHdSupport.generateMnemonic(MnemonicType.ENGLISH);
+        return mnemonic;
+    }
+
+    @Override
+    public String createDidByMnemonic(String mnemonic) {
+        String ret;
+        try{
+            ret = ElaHdSupport.generate(mnemonic, 0);
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException | CipherException e){
+            logger.error("Err: signDidMessage Parameter invalid.");
+            e.printStackTrace();
+            return null;
+        }
+
+//        return "{\"privateKey\":\"" + privateKey + "\",\"publicKey\":\"" + publicKey + "\",\"publicAddress\":\"" + publicAddr + "\"}";
+        Map data = JSON.parseObject(ret, Map.class);
+        String privateKey = (String)data.get("privateKey");
+        String publicKey = (String)data.get("publicKey");
+        String did = Ela.getIdentityIDFromPrivate(privateKey);
+
+        Map<String, String> result = new HashMap<>();
+        result.put("DidPrivateKey", privateKey);
+        result.put("DID", did);
+        result.put("DidPublicKey", publicKey);
+
+        return JSON.toJSONString(result);
     }
 
     @Override

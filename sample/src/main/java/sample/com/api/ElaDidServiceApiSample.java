@@ -166,17 +166,17 @@ public class ElaDidServiceApiSample {
         ReturnMsgEntity ret = elaDidService.transferEla(srcPrivateKeys, dst, ChainType.MAIN_CHAIN);
     }
 
-    public static void main(String[] args) throws Exception {
-        ElaDidServiceApiSample sample = new ElaDidServiceApiSample();
-//        sample.createDid();
-//        sample.getPublicKey();
-//        sample.getDid();
-//        sample.signAndVerifyDidMessage();
-//        sample.packDidRawData();
-//        sample.setAndGetDidProperty();
-//        sample.deleteDidProperty();
-//        sample.deleteDid();
-//        sample.getDidProperty();
-        sample.transferEla();
-    }
+//    public static void main(String[] args) throws Exception {
+//        ElaDidServiceApiSample sample = new ElaDidServiceApiSample();
+////        sample.createDid();
+////        sample.getPublicKey();
+////        sample.getDid();
+////        sample.signAndVerifyDidMessage();
+////        sample.packDidRawData();
+////        sample.setAndGetDidProperty();
+////        sample.deleteDidProperty();
+////        sample.deleteDid();
+////        sample.getDidProperty();
+//        sample.transferEla();
+//    }
 }
