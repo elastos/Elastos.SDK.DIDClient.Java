@@ -37,9 +37,9 @@ public class ElaDidDataTool {
         System.out.println("appName:" + appName);
         System.out.println("appId:"+appId);
         System.out.println("didMnemonic:" + didMnemonic);
-        System.out.println("didPrivateKey"+didPrivateKey);
-        System.out.println("didPublicKey"+didPublicKey);
-        System.out.println("did"+did);
+        System.out.println("didPrivateKey:"+didPrivateKey);
+        System.out.println("didPublicKey:"+didPublicKey);
+        System.out.println("did:"+did);
     }
 
     public static void main(String[] args) throws Exception {

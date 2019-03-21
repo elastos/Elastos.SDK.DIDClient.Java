@@ -7,6 +7,7 @@
 package org.elastos.service.ela;
 
 import com.alibaba.fastjson.JSON;
+import org.elastos.conf.DependServiceConfiguration;
 import org.elastos.conf.RetCodeConfiguration;
 import org.elastos.entity.ChainType;
 import org.elastos.entity.Errors;
@@ -23,7 +24,7 @@ import java.util.Map;
 
 public class DidBackendService {
     private static Logger logger = LoggerFactory.getLogger(DidBackendService.class);
-    private static String didPreFix = null;
+    private static String didPreFix = DependServiceConfiguration.NODE_URL_PRIFIX;
 
     private static final String getUtosByAddr = "/api/v1/asset/utxos/";
     private static final String transaction = "/api/v1/transaction";

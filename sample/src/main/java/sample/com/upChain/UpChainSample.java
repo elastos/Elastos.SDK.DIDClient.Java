@@ -2,6 +2,7 @@ package sample.com.upChain;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.shiro.crypto.hash.SimpleHash;
+import org.elastos.entity.ReturnMsgEntity;
 import org.elastos.service.ElaDidService;
 import org.elastos.service.ElaDidServiceImp;
 import sample.com.util.HttpUtil;
@@ -54,35 +55,8 @@ public class UpChainSample {
     }
 
     public String putDataToElaChain(String rawData) {
-
-        Map<String, String> header = new HashMap<>();
-        header.put("X-Elastos-Agent-Auth", createAuthHeaderValue());
-        String response = HttpUtil.post(ELA_BLOCK_AGENT_URL + "/api/1/blockagent/upchain/data", rawData, header);
-        if (null == response) {
-            System.out.println("Err: putDataToElaChain post failed");
-            return null;
-        }
-
-        Map<String, Object> msg = (Map<String, Object>) JSON.parse(response);
-        if ((int) msg.get("status") == 200) {
-            return (String) msg.get("result");
-        } else {
-            System.out.println("Err: block agent failed" + msg.get("result"));
-            return null;
-        }
-    }
-
-    public String createAuthHeaderValue() {
-        long time = new Date().getTime();
-        String strTime = String.valueOf(time);
-        SimpleHash hash = new SimpleHash("md5", acc_secret, strTime);
-        String auth = hash.toHex();
-        Map<String, String> map = new HashMap<>();
-        map.put("id", acc_id);
-        map.put("time", String.valueOf(time));
-        map.put("auth", auth);
-        String X_Elastos_Agent_Auth_value = JSON.toJSONString(map);
-        return X_Elastos_Agent_Auth_value;
+        String ret = didService.upChainByBlockAgent(acc_id, acc_secret, rawData);
+        return ret;
     }
 
     public String getDataFromElaChain(String key) {

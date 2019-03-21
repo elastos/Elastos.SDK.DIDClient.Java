@@ -10,9 +10,11 @@ package org.elastos.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.crypto.hash.SimpleHash;
 import org.eclipse.jetty.util.StringUtil;
 import org.elastos.DTO.DidAuthRequest;
 import org.elastos.POJO.DidEntity;
+import org.elastos.conf.DependServiceConfiguration;
 import org.elastos.conf.DidConfiguration;
 import org.elastos.conf.RetCodeConfiguration;
 import org.elastos.ela.ECKey;
@@ -25,6 +27,7 @@ import org.elastos.entity.MnemonicType;
 import org.elastos.entity.ReturnMsgEntity;
 import org.elastos.service.ela.DidBackendService;
 import org.elastos.service.ela.ElaTransaction;
+import org.elastos.util.HttpUtil;
 import org.elastos.util.ela.ElaHdSupport;
 import org.elastos.util.ela.ElaKit;
 import org.elastos.util.ela.ElaSignTool;
@@ -37,19 +40,31 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ElaDidServiceImp implements ElaDidService {
     private static final String CHARSET = "UTF-8";
 
     private static Logger logger = LoggerFactory.getLogger(ElaDidServiceImp.class);
 
+    private String blockAgentUrl = DependServiceConfiguration.BLOCKAGENT_URL_PRIFIX;
+
+    private String didExplorerUrl = DependServiceConfiguration.DID_EXPLORER_URL_PRIFIX;
+
+
     @Override
     public void setElaNodeUrl(String nodeUrl) {
         DidBackendService.setDidPreFix(nodeUrl);
+    }
+
+    @Override
+    public void setBlockAgentUrl(String url) {
+        blockAgentUrl = url;
+    }
+
+    @Override
+    public void setDidExplorerUrl(String url) {
+        didExplorerUrl = url;
     }
 
     @Override
@@ -61,9 +76,9 @@ public class ElaDidServiceImp implements ElaDidService {
     @Override
     public String createDidByMnemonic(String mnemonic) {
         String ret;
-        try{
+        try {
             ret = ElaHdSupport.generate(mnemonic, 0);
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException | CipherException e){
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException | CipherException e) {
             logger.error("Err: signDidMessage Parameter invalid.");
             e.printStackTrace();
             return null;
@@ -71,8 +86,8 @@ public class ElaDidServiceImp implements ElaDidService {
 
 //        return "{\"privateKey\":\"" + privateKey + "\",\"publicKey\":\"" + publicKey + "\",\"publicAddress\":\"" + publicAddr + "\"}";
         Map data = JSON.parseObject(ret, Map.class);
-        String privateKey = (String)data.get("privateKey");
-        String publicKey = (String)data.get("publicKey");
+        String privateKey = (String) data.get("privateKey");
+        String publicKey = (String) data.get("publicKey");
         String did = Ela.getIdentityIDFromPrivate(privateKey);
 
         Map<String, String> result = new HashMap<>();
@@ -238,6 +253,39 @@ public class ElaDidServiceImp implements ElaDidService {
         return raw;
     }
 
+    @Override
+    public String upChainByBlockAgent(String accessId, String accessSecret, String rawData) {
+        Map<String, String> header = new HashMap<>();
+        header.put("X-Elastos-Agent-Auth", createAuthHeaderValue(accessId, accessSecret));
+        String response = HttpUtil.post(blockAgentUrl + "/api/1/blockagent/upchain/data", rawData, header);
+        if (null == response) {
+            System.out.println("Err: putDataToElaChain post failed");
+            return null;
+        }
+
+        Map<String, Object> msg = (Map<String, Object>) JSON.parse(response);
+        if ((int) msg.get("status") == 200) {
+            return (String) msg.get("result");
+        } else {
+            System.out.println("Err: block agent failed" + msg.get("result"));
+            return null;
+        }
+    }
+
+    private String createAuthHeaderValue(String acc_id, String acc_secret) {
+        long time = new Date().getTime();
+        String strTime = String.valueOf(time);
+        SimpleHash hash = new SimpleHash("md5", acc_secret, strTime, 1);
+        String auth = hash.toHex();
+        Map<String, String> map = new HashMap<>();
+        map.put("id", acc_id);
+        map.put("time", String.valueOf(time));
+        map.put("auth", auth);
+        String X_Elastos_Agent_Auth_value = JSON.toJSONString(map);
+        return X_Elastos_Agent_Auth_value;
+    }
+
+
     private void propertiesMapToList(Map<String, String> propertiesMap, List<DidEntity.DidProperty> properties) {
         propertiesMap.forEach((k, v) -> {
             DidEntity.DidProperty property = new DidEntity.DidProperty();
@@ -375,7 +423,7 @@ public class ElaDidServiceImp implements ElaDidService {
             return null;
         }
 
-        String msg =  new String(DatatypeConverter.parseHexBinary(hexMsg));
+        String msg = new String(DatatypeConverter.parseHexBinary(hexMsg));
         DidEntity didEntity = JSON.parseObject(msg, DidEntity.class);
         String tag = didEntity.getTag();
         if (StringUtil.isBlank(tag) || (0 != DidEntity.DID_TAG.compareTo(tag))) {
@@ -534,4 +582,35 @@ public class ElaDidServiceImp implements ElaDidService {
         boolean isVerify = ElaSignTool.verify(msg, sig, pub);
         return isVerify;
     }
+
+    @Override
+    public String bindUserDid(String serverDidPrivateKey, String userId, String userDid) {
+        if (StringUtils.isAnyBlank(serverDidPrivateKey, userDid, userId)) {
+            logger.error("Err: bindUserDid Parameter invalid.");
+            System.out.println("Err: bindUserDid Parameter invalid.");
+        }
+        String key = "user/" + userId + "/DID";
+        return this.packDidRawData(serverDidPrivateKey, key, userDid);
+    }
+
+
+    @Override
+    public String getUserDid(String serverDid, String userId) {
+        String key = "user/" + userId + "/DID";
+        String response = HttpUtil.get(didExplorerUrl + "/api/1/didexplorer/did/" + serverDid + "/property?key=" + key, null);
+        Map<String, Object> msg = (Map<String, Object>) JSON.parse(response);
+        if ((int) msg.get("status") == 200) {
+            String result = (String) msg.get("result");
+            if ((null != result) && (!result.isEmpty())) {
+                List<Map<String, String>> properties = (List<Map<String, String>>) JSON.parse(result);
+                return properties.get(0).get("value");
+            } else {
+                return null;
+            }
+        } else {
+            System.out.println("Err: getDataFromElaChain failed" + msg.get("result"));
+            return null;
+        }
+    }
+
 }

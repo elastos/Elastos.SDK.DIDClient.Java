@@ -199,4 +199,22 @@ public class ElaDidServiceTest extends TestCase {
         status = ret.getStatus();
         assertEquals("Err after del did property, didService.getDidPropertyByTxId should not get info. result:" + JSON.toJSONString(ret.getResult()), status, RetCodeConfiguration.NOT_FOUND);
     }
+
+    @Test
+    public void testBindUserDid() throws Exception {
+        String userId = "testUser";
+        String userPriKey = Ela.getPrivateKey();
+        String userDid = Ela.getIdentityIDFromPrivate(userPriKey);
+        String rawData = didService.bindUserDid(didPrivateKey, userId, userDid);
+        assertNotNull(rawData);
+
+        String acc_id = "unCZRceA8o7dbny";
+        String acc_secret = "qtvb4PlRVGLYYYQxyLIo3OgyKI7kUL";
+        didService.upChainByBlockAgent(acc_id, acc_secret, rawData);
+
+        //wait 4 minutes for info add on chain!!
+//        TimeUnit.MINUTES.sleep(4);
+        String d = didService.getUserDid(did, userId);
+        assertEquals(d, userDid);
+    }
 }

@@ -12,8 +12,14 @@ import java.util.Map;
 
 public interface ElaDidService {
 
-    //设定上链的节点地址
+    //设定ELA节点地址
     void setElaNodeUrl(String url);
+
+    //设定上链服务（blockagent）地址
+    void setBlockAgentUrl(String url);
+
+    //设定DID查询节点地址
+    void setDidExplorerUrl(String url);
 
     //创建DID助记词
     String createDidMnemonic();
@@ -50,6 +56,9 @@ public interface ElaDidService {
     //将多个DID属性数据打包成上链数据
     String packDidRawData(String didPrivateKey, Map<String, String> properties);
 
+    //使用BlockAgent服务上链
+    String upChainByBlockAgent(String accessId, String accessSecret, String rawData);
+
     //已实现
     ReturnMsgEntity setDidProperty(String payWalletPrivateKey, String didPrivateKey, String propertyKey, String propertyData);
 
@@ -64,8 +73,11 @@ public interface ElaDidService {
     //已实现
     ReturnMsgEntity delDidProperty(String payWalletPrivateKey, String didPrivateKey, String propertyKey);
 
-    // 绑定用户名与第三方登陆
-//    ReturnMsgEntity bindUserCountToDid(String payWalletPrivateKey, String didPrivateKey, String userDid, String userId);
+    // 绑定DID到用户名
+    String bindUserDid(String serverDidPrivateKey, String userId, String userDid);
+
+    // 获取已经绑定的用户DID
+    String getUserDid(String serverDid, String userId);
 
 //    ReturnMsgEntity sendDidAuthRequest(String didPrivateKey, Long randomNum, Long serialNum);
 
