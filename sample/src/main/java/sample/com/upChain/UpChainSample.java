@@ -13,12 +13,15 @@ import java.util.concurrent.TimeUnit;
 
 public class UpChainSample {
 
-    //用户替换为所在链的对应节点信息
-    private final String ELA_NODE_URL = "http://54.64.220.165:21334";
+    //用户替换为所需链的对应节点信息
+    // private final String ELA_NODE_URL = "http://52.197.53.77:21604"; //正式DID链
+    private final String ELA_NODE_URL = "http://54.64.220.165:21604";   //测试DID链
     //用户替换为 BLOCK AGENT 上链服务的URL
-    private final String ELA_BLOCK_AGENT_URL = "http://localhost:8093";
+    // private final String ELA_BLOCK_AGENT_URL = "https://api-wallet-did-mainnet.elastos.org"; //正式DID链上链服务
+    private final String ELA_BLOCK_AGENT_URL = "https://api-wallet-did-testnet.elastos.org";    //测试DID链上链服务 
     //用户替换为DID EXPLORER 服务的URL
-    private final String ELA_EXPLORER_URL = "http://localhost:8091";
+    // private final String ELA_EXPLORER_URL = "http://sidebackend-mainnet.bbjb2qwn2i.ap-northeast-1.elasticbeanstalk.com"; //正式DID链浏览器服务
+    private final String ELA_EXPLORER_URL = "http://sidebackend-testnet.bbjb2qwn2i.ap-northeast-1.elasticbeanstalk.com";    //测试DID链浏览器服务 
 
     //用户替换为自己的did信息
     private String didPrivateKey = "";
@@ -71,29 +74,24 @@ public class UpChainSample {
     }
 
     public static void main(String[] args) throws Exception {
-
-        for (String a : args) {
-            System.out.println("****************Is:"+a);
-        }
-
         UpChainSample sample = new UpChainSample();
 
         sample.createDid();
 
-//        String upChainDataKey = "My_notebooks";
-//        List<String> didProperty = new ArrayList<>();
-//        didProperty.add("Dell中文");
-//        didProperty.add("Mac中文");
-//        didProperty.add("Thinkpad中文");
-//        String upChainDataValue = JSON.toJSONString(didProperty);
+       String upChainDataKey = "My_notebooks";
+       List<String> didProperty = new ArrayList<>();
+       didProperty.add("Dell中文");
+       didProperty.add("Mac中文");
+       didProperty.add("Thinkpad中文");
+       String upChainDataValue = JSON.toJSONString(didProperty);
 
-//        String rawData = sample.packDidRawData(upChainDataKey, upChainDataValue);
+       String rawData = sample.packDidRawData(upChainDataKey, upChainDataValue);
 
-//        sample.putDataToElaChain(rawData);
-//
-//        //wait 3 minutes for info add on chain!!
-//        TimeUnit.MINUTES.sleep(4);
-//
-//        String value = sample.getDataFromElaChain(upChainDataKey);
+       sample.putDataToElaChain(rawData);
+
+       //wait 3 minutes for info add on chain!!
+       TimeUnit.MINUTES.sleep(4);
+
+       String value = sample.getDataFromElaChain(upChainDataKey);
     }
 }
