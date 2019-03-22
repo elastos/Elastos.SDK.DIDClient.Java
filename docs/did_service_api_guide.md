@@ -16,6 +16,14 @@ ElaDidService didService = new ElaDidServiceImp();
 **void setElaNodeUrl(String url);**
 * Set elastos chain node url.
 
+## setBlockAgentUrl
+**void setBlockAgentUrl(String url);**
+* Set Block agent service url.
+
+## setDidExplorerUrl
+**void setDidExplorerUrl(String url);**
+* Set DID explorer url.
+
 ## createDid
 **String createDid();**
 * Create a did, return a did private key, a public key and a did.
@@ -114,6 +122,19 @@ ElaDidService didService = new ElaDidServiceImp();
     System.out.println("DidService.packDidRawData rawData:" + rawData);
 ```
 
+## upChainByBlockAgent
+**String upChainByBlockAgent(String accessId, String accessSecret, String rawData);**
+* Send raw data which be gene by packDidRawData to did chain.
+* The accessId and accessSecret get form elastos service platform.
+```Java
+    String txid = didService.upChainByBlockAgent(accessId, accessSecret, rawData);
+    if (null == txid) {
+        System.out.println("Err didService.upChainByBlockAgent failed.");
+        return;
+    }
+    System.out.println("DidService.upChainByBlockAgent txid:" + txid);
+```
+
 ## setDidProperty
 **ReturnMsgEntity setDidProperty(String payWalletPrivateKey, String didPrivateKey, String propertyKey, String propertyData);**
 * Put propertyKey and propertyData on did chain. payWalletPrivateKey is used to pay the record fee, didPrivateKey is used to sign and verify did data.
@@ -156,4 +177,27 @@ ElaDidService didService = new ElaDidServiceImp();
     }
 
     String txId = (String) ret.getResult();
+```
+## bindUserDid
+**String bindUserDid(String serverDidPrivateKey, String userId, String userDid);**
+* Bind userId and userDid and pack raw data for up to DID chain.
+
+```Java
+    String rawData = didService.bindUserDid(String serverDidPrivateKey, String userId, String userDid);
+    if (null == rawData) {
+        System.out.println("Err didService.bindUserDid failed.");
+        return;
+    }
+```
+
+## getUserDid
+**String getUserDid(String serverDid, String userId);**
+* Get userDId from DID chain.
+
+```Java
+    String userDid = didService.getUserDid(String serverDid, String userId);
+    if (null == userDid) {
+        System.out.println("Err didService.getUserDid failed.");
+        return;
+    }
 ```
