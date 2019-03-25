@@ -13,6 +13,7 @@ public class ElaDidDataTool {
 
     String appName = "";
     String appId = "";
+    String addIdSign = "";
     String didMnemonic = "";
     String didPrivateKey = "";
     String didPublicKey = "";
@@ -31,15 +32,17 @@ public class ElaDidDataTool {
 
         appName = inAppName;
         appId = didService.signDidMessage(didPrivateKey, appName);
+        addIdSign = didService.signDidMessage(didPrivateKey, appId);
     }
 
     public void showData(){
-        System.out.println("appName:" + appName);
-        System.out.println("appId:"+appId);
-        System.out.println("didMnemonic:" + didMnemonic);
-        System.out.println("didPrivateKey:"+didPrivateKey);
-        System.out.println("didPublicKey:"+didPublicKey);
-        System.out.println("did:"+did);
+        System.out.println("appName: " + appName);
+        System.out.println("appId: "+appId);
+        System.out.println("appIdSign: "+addIdSign);
+        System.out.println("didMnemonic: " + didMnemonic);
+        System.out.println("didPrivateKey: "+didPrivateKey);
+        System.out.println("didPublicKey: "+didPublicKey);
+        System.out.println("did: "+did);
     }
 
     public static void main(String[] args) throws Exception {
