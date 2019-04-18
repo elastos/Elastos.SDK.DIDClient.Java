@@ -37,8 +37,8 @@ public class ElaDidServiceApiSample {
         didProperty.add("中学Mac");
         didProperty.add("Thinkpad");
         didPropertyValue = JSON.toJSONString(didProperty);
-        didService.setElaNodeUrl("http://54.64.220.165:21334");
-//        didService.setElaNodeUrl("http://localhost:21334");
+//        didService.setElaNodeUrl("http://did-mainnet-node-lb-1452309420.ap-northeast-1.elb.amazonaws.com:20604");
+        didService.setElaNodeUrl("http://54.64.220.165:21604");
     }
 
     public void createDid() throws Exception {
@@ -90,6 +90,12 @@ public class ElaDidServiceApiSample {
         System.out.println("DidService.packDidRawData rawData:" + rawData);
     }
 
+    public void getDidPropertyByTxid() throws Exception {
+        didService.getDidPropertyByTxId("ig2MwSvwxR4vVPZCWEGwArTyQZYZK9pw2d",
+                "name",
+                "9e782aabfc41f1d22df67eb9d045e0b049067ce57467801fbe6226048cc1d2d0");
+
+    }
     public void setAndGetDidProperty() throws Exception {
         ReturnMsgEntity ret = didService.setDidProperty(payPrivateKey, didPrivateKey, didPropertyKey, didPropertyValue);
         long status = ret.getStatus();
@@ -163,20 +169,21 @@ public class ElaDidServiceApiSample {
         dst.put("ETLde1cpZJ8pgyrFUg7yjszQu26GJfzZ6C", 8.0);
         List<String> srcPrivateKeys = new ArrayList<>();
         srcPrivateKeys.add("96A10CEEAA43C7E93F122BDE8F84DB336DA4F6CEA92341E15864B390E1EB266D");
-        ReturnMsgEntity ret = elaDidService.transferEla(srcPrivateKeys, dst, ChainType.MAIN_CHAIN);
+        ReturnMsgEntity ret = elaDidService.transferEla(srcPrivateKeys, dst, ChainType.MAIN_DID_CROSS_CHAIN);
     }
 
-//    public static void main(String[] args) throws Exception {
-//        ElaDidServiceApiSample sample = new ElaDidServiceApiSample();
-////        sample.createDid();
-////        sample.getPublicKey();
-////        sample.getDid();
-////        sample.signAndVerifyDidMessage();
-////        sample.packDidRawData();
-////        sample.setAndGetDidProperty();
-////        sample.deleteDidProperty();
-////        sample.deleteDid();
-////        sample.getDidProperty();
+    public static void main(String[] args) throws Exception {
+        ElaDidServiceApiSample sample = new ElaDidServiceApiSample();
+        sample.getDidPropertyByTxid();
+//        sample.createDid();
+//        sample.getPublicKey();
+//        sample.getDid();
+//        sample.signAndVerifyDidMessage();
+//        sample.packDidRawData();
+//        sample.setAndGetDidProperty();
+//        sample.deleteDidProperty();
+//        sample.deleteDid();
+//        sample.getDidProperty();
 //        sample.transferEla();
-//    }
+    }
 }

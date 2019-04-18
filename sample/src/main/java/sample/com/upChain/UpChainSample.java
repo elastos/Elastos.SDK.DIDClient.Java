@@ -5,7 +5,7 @@ import org.apache.shiro.crypto.hash.SimpleHash;
 import org.elastos.entity.ReturnMsgEntity;
 import org.elastos.service.ElaDidService;
 import org.elastos.service.ElaDidServiceImp;
-import sample.com.util.HttpUtil;
+import org.elastos.util.HttpUtil;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
