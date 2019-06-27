@@ -29,6 +29,6 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   did_service_api_guide.md
+   did_client_api_guide.md
 
 
