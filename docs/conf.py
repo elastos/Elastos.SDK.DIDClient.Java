@@ -36,6 +36,7 @@ compat.make_admonition = BaseAdmonition
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+'recommonmark'
 ]
 
 
