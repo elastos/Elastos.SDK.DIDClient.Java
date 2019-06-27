@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 public class ElaTransaction {
-
     private class Sender {
         String address;
         String privateKey;
@@ -37,7 +36,7 @@ public class ElaTransaction {
             address = addr;
             privateKey = priKey;
             chainType = type;
-            utxoList = DidBackendService.getUtxoListByAddr(address, type);
+            utxoList = didBackendService.getUtxoListByAddr(address, type);
             if (utxoList == null) {
                 utxoList = new ArrayList<>();
             }
@@ -55,16 +54,18 @@ public class ElaTransaction {
     }
 
     private static Logger logger = LoggerFactory.getLogger(ElaTransaction.class);
+    private DidBackendService didBackendService = new DidBackendService();
     private List<Sender> senderList = new ArrayList<>();
     private List<Receiver> receiverList = new ArrayList<>();
     private String memo = null;
     private ChainType chainType = null;
     private Double totalFee = null;
 
-    public ElaTransaction(ChainType type, String memoInput) {
+    public ElaTransaction(String nodeUrl, ChainType type, String memoInput) {
         chainType = type;
         memo = memoInput;
         totalFee = 0.0;
+        didBackendService.setDidPrefix(nodeUrl);
     }
 
     public String getMemo() {
@@ -126,7 +127,7 @@ public class ElaTransaction {
         String txHash = (String) tx.get("txHash");
         logger.info("rawTx:" + rawTx + ", txHash :" + txHash);
 
-        return DidBackendService.sendRawTransaction(rawTx, chainType);
+        return didBackendService.sendRawTransaction(rawTx, chainType);
     }
 
     /**
@@ -147,7 +148,6 @@ public class ElaTransaction {
 
     }
 
-
     private String createCrossChainRawTx() {
         Map<String, Object> tx = new HashMap<>();
         Double spendMoney = dealCrossChainTxInputs(tx);
@@ -164,10 +164,10 @@ public class ElaTransaction {
         JSONObject par = new JSONObject();
         par.accumulateAll(paraListMap);
         logger.info("sending : " + par.toString());
-        System.out.println("createCrossChainRawTx sending:"+par.toString());
+        System.out.println("createCrossChainRawTx sending:" + par.toString());
         String rawTx = SingleSignTransaction.genCrossChainRawTransaction(par);
         logger.info("receiving : " + rawTx);
-        System.out.println("createCrossChainRawTx receiving:"+rawTx);
+        System.out.println("createCrossChainRawTx receiving:" + rawTx);
 
         return rawTx;
     }
@@ -252,10 +252,10 @@ public class ElaTransaction {
         JSONObject par = new JSONObject();
         par.accumulateAll(paraListMap);
         logger.info("sending : " + par);
-        System.out.println("createSameChainRawTx sending:"+par.toString());
+        System.out.println("createSameChainRawTx sending:" + par.toString());
         String rawTx = ElaKit.genRawTransaction(par);
         logger.info("receiving : " + rawTx);
-        System.out.println("createSameChainRawTx receiving:"+rawTx);
+        System.out.println("createSameChainRawTx receiving:" + rawTx);
 
         return rawTx;
     }

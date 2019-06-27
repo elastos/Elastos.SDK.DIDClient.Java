@@ -97,7 +97,7 @@ public class HttpUtil {
             CloseableHttpClient client = HttpUtil.createHttpClient();
             HttpGet httpGet = new HttpGet(url);
 
-            if (null != headers) {
+            if ((null != headers) && !headers.isEmpty()) {
                 for (Map.Entry<String, String> h : headers.entrySet()) {
                     httpGet.setHeader(h.getKey(), h.getValue());
                 }
@@ -130,7 +130,7 @@ public class HttpUtil {
             HttpClient client = HttpUtil.createHttpClient();
             HttpPost httpPost = new HttpPost(url);
 
-            if (null != headers) {
+            if ((null != headers) && !headers.isEmpty()) {
                 for (Map.Entry<String, String> h : headers.entrySet()) {
                     httpPost.setHeader(h.getKey(), h.getValue());
                 }
@@ -177,7 +177,7 @@ public class HttpUtil {
             HttpPost httpPost = new HttpPost(url);
             httpPost.setHeader("Accept", "application/json");
             httpPost.setHeader("Content-Type", "application/json");
-            if (null != headers) {
+            if ((null != headers) && !headers.isEmpty()) {
                 for (Map.Entry<String, String> h : headers.entrySet()) {
                     httpPost.setHeader(h.getKey(), h.getValue());
                 }
@@ -212,7 +212,7 @@ public class HttpUtil {
             MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
             //multipartEntityBuilder.setCharset(Charset.forName("UTF-8"));
 
-            if (null != headers) {
+            if ((null != headers) && !headers.isEmpty()) {
                 for (Map.Entry<String, String> h : headers.entrySet()) {
                     httpPost.setHeader(h.getKey(), h.getValue());
                 }
@@ -256,7 +256,7 @@ public class HttpUtil {
             CloseableHttpClient client = HttpUtil.createHttpClient();
             HttpGet httpGet = new HttpGet(url);
 
-            if (null != headers) {
+            if ((null != headers) && !headers.isEmpty()) {
                 for (Map.Entry<String, String> h : headers.entrySet()) {
                     httpGet.setHeader(h.getKey(), h.getValue());
                 }

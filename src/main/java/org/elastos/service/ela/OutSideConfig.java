@@ -21,8 +21,9 @@ public class OutSideConfig {
                     + "/conf/ela.did.properties";
             InputStream in = new BufferedInputStream(new FileInputStream(filePath));
             properties.load(in);
+            logger.info("Ela DID configure by ela.did.properties");
         } catch (IOException e) {
-            logger.info("Ela DID无法读取外部配置文件 ela.did.properties 信息");
+            logger.info("Ela DID node url will input by api.");
             return false;
         }
         return true;

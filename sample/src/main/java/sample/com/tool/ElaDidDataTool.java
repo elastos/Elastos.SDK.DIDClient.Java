@@ -2,9 +2,6 @@ package sample.com.tool;
 
 import com.alibaba.fastjson.JSON;
 import org.elastos.service.ElaDidService;
-import org.elastos.service.ElaDidServiceImp;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.elastos.POJO.DidEntity;
 
 import java.util.*;
@@ -24,25 +21,25 @@ public class ElaDidDataTool {
     final String help = "--name         the app name.\n" +
             "--mne          mnemonic, if not set, will generate a new one.\n\n";
 
-    ElaDidService didService = new ElaDidServiceImp();
+    ElaDidService didService = new ElaDidService();
 
     public void createAppInfoAndDid(String inAppName, String inMnemonic) throws Exception {
 
         if (inMnemonic.isEmpty()) {
-            didMnemonic = didService.createDidMnemonic();
+            didMnemonic = didService.createMnemonic();
         } else {
             didMnemonic = inMnemonic;
         }
 
-        String ret = didService.createDidByMnemonic(didMnemonic);
+        String ret = didService.createDid(didMnemonic, 0);
         Map data = JSON.parseObject(ret, Map.class);
         didPrivateKey = (String) data.get("DidPrivateKey");
-        did = (String) data.get("DID");
+        did = (String) data.get("Did");
         didPublicKey = (String) data.get("DidPublicKey");
 
         appName = inAppName;
-        appId = didService.signDidMessage(didPrivateKey, appName);
-        addIdSign = didService.signDidMessage(didPrivateKey, appId);
+        appId = didService.signMessage(didPrivateKey, appName);
+        addIdSign = didService.signMessage(didPrivateKey, appId);
 
 
         List<DidEntity.DidProperty> properties = new ArrayList<>();

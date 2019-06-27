@@ -7,7 +7,6 @@
 package org.elastos.service.ela;
 
 import com.alibaba.fastjson.JSON;
-import org.elastos.conf.DependServiceConfiguration;
 import org.elastos.conf.RetCodeConfiguration;
 import org.elastos.entity.ChainType;
 import org.elastos.entity.Errors;
@@ -24,29 +23,29 @@ import java.util.Map;
 
 public class DidBackendService {
     private static Logger logger = LoggerFactory.getLogger(DidBackendService.class);
-    private static String didPreFix = DependServiceConfiguration.NODE_URL_PRIFIX;
+    private String didPrefix = null;
 
-    private static final String getUtosByAddr = "/api/v1/asset/utxos/";
-    private static final String transaction = "/api/v1/transaction";
+    private final String getUtosByAddr = "/api/v1/asset/utxos/";
+    private final String transaction = "/api/v1/transaction";
 
-    static {
-        boolean ret = OutSideConfig.readOutSide();
-        if (ret) {
-            didPreFix = OutSideConfig.getObject("node.prefix");
-        }
+//    {
+//        boolean ret = OutSideConfig.readOutSide();
+//        if (ret) {
+//            didPrefix = OutSideConfig.getObject("node.prefix");
+//        }
+//    }
+
+    public void setDidPrefix(String didPrefix) {
+        this.didPrefix = didPrefix;
     }
 
-    public static void setDidPreFix(String didPreFix) {
-        DidBackendService.didPreFix = didPreFix;
-    }
-
-    public static String getDidPreFix() {
-        if (null == didPreFix) {
-            String msg = "There is no ela chain node url, please set it with API setElaNodeUrl or configuration file in \"./conf/ela.did.properties\".";
+    public String getDidPrefix() {
+        if (null == didPrefix) {
+            String msg = "There is no ela chain node url, please call DidBackendService::setDidPrefix first";
             System.out.println(msg);
             throw new NullPointerException(msg);
         }
-        return didPreFix;
+        return didPrefix;
     }
 
     public enum ReqMethod {
@@ -59,17 +58,17 @@ public class DidBackendService {
      *
      * @param address
      */
-    private static void checkAddr(String address) {
+    private void checkAddr(String address) {
         if (!ElaKit.checkAddress(address)) {
             throw new ApiRequestDataException(Errors.ELA_ADDRESS_INVALID.val() + ":" + address);
         }
     }
 
-    public static List<Map> getUtxoListByAddr(String address, ChainType type) {
+    public List<Map> getUtxoListByAddr(String address, ChainType type) {
 
         checkAddr(address);
 
-        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.GET, getDidPreFix()+ getUtosByAddr, address);
+        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.GET, getDidPrefix() + getUtosByAddr, address);
         if (msgEntity.getStatus() == RetCodeConfiguration.SUCC) {
             try {
                 List<Map> data = (List<Map>) msgEntity.getResult();
@@ -85,7 +84,7 @@ public class DidBackendService {
         }
     }
 
-    public static ReturnMsgEntity sendRawTransaction(String rawTx, ChainType type) {
+    public ReturnMsgEntity sendRawTransaction(String rawTx, ChainType type) {
 
         RawTxEntity entity = new RawTxEntity();
         entity.setData(rawTx);
@@ -94,12 +93,12 @@ public class DidBackendService {
 
         String jsonEntity = JSON.toJSONString(entity);
         System.out.println("tx send data:" + jsonEntity);
-        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.POST, getDidPreFix()+ transaction, jsonEntity);
+        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.POST, getDidPrefix() + transaction, jsonEntity);
         return msgEntity;
     }
 
-    public static Map<String, Object> getTransaction(String txId, ChainType type) {
-        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.GET, getDidPreFix()+ transaction+"/", txId);
+    public Map<String, Object> getTransaction(String txId, ChainType type) {
+        ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.GET, getDidPrefix() + transaction + "/", txId);
 
         if (msgEntity.getStatus() == RetCodeConfiguration.SUCC) {
             return (Map<String, Object>) msgEntity.getResult();
@@ -108,7 +107,7 @@ public class DidBackendService {
         }
     }
 
-    private static ReturnMsgEntity elaReqChainData(ReqMethod method, String url, String data) {
+    private ReturnMsgEntity elaReqChainData(ReqMethod method, String url, String data) {
         String response;
 
         if (ReqMethod.GET == method) {

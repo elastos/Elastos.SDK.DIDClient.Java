@@ -3,30 +3,27 @@ package sample.com.api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.elastos.conf.RetCodeConfiguration;
-import org.elastos.entity.ChainType;
 import org.elastos.entity.ReturnMsgEntity;
 import org.elastos.service.ElaDidService;
-import org.elastos.service.ElaDidServiceImp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 
 public class ElaDidServiceApiSample {
     private static Logger logger = LoggerFactory.getLogger(ElaDidServiceApiSample.class);
 
+    String didNodeUrl = "http://54.64.220.165:21334";
     String payPrivateKey = "17f9885d36ce7c646cd1d613708e9b375f81b81309fbdfbd922d0cd72faadb1b";
     String payPublicKey = "035ADEF4A1566BD30B2A89327ECC3DE9B876F9624AEBEDDA7725A24816125CE261";
     String payPublicAddr = "EJqsNp9qSWkX7wkkKeKnqeubok6FxuA9un";
     String didPrivateKey = "";
     String didPublicKey = "";
     String did = "";
-    ElaDidService didService = new ElaDidServiceImp();
+    ElaDidService didService = new ElaDidService();
     String didPropertyKey;
     String didPropertyValue;
 
@@ -37,26 +34,25 @@ public class ElaDidServiceApiSample {
         didProperty.add("中学Mac");
         didProperty.add("Thinkpad");
         didPropertyValue = JSON.toJSONString(didProperty);
-//        didService.setElaNodeUrl("http://did-mainnet-node-lb-1452309420.ap-northeast-1.elb.amazonaws.com:20604");
-        didService.setElaNodeUrl("http://54.64.220.165:21604");
     }
 
     public void createDid() throws Exception {
-        String ret = didService.createDid();
+        String memo = didService.createMnemonic();
+        String ret = didService.createDid(memo, 0);
         Map data = JSON.parseObject(ret, Map.class);
         didPrivateKey = (String) data.get("DidPrivateKey");
-        did = (String) data.get("DID");
+        did = (String) data.get("Did");
         didPublicKey = (String) data.get("DidPublicKey");
     }
 
     public void signAndVerifyDidMessage() throws Exception {
-        String sig = didService.signDidMessage(didPrivateKey, didPropertyKey);
+        String sig = didService.signMessage(didPrivateKey, didPropertyKey);
         if (null == sig) {
             System.out.println("Err didService.signDidMessage failed.");
             return;
         }
 
-        boolean isVerify = didService.verifyDidMessage(didPublicKey, sig, didPropertyKey);
+        boolean isVerify = didService.verifyMessage(didPublicKey, sig, didPropertyKey);
         if (!isVerify) {
             System.out.println("Err didService.verifyDidMessage not right. result:");
             return;
@@ -74,33 +70,32 @@ public class ElaDidServiceApiSample {
     }
 
     public void getDid() throws Exception {
-        String did = didService.getDid(didPrivateKey);
-        if (null == did) {
-            System.out.println("Err didService.getDid failed. result:");
+        String did1 = didService.getDidFromPrivateKey(didPrivateKey);
+        if (null == did1) {
+            System.out.println("Err didService.getDidFromPrivateKey failed. result:");
             return;
+        }
+        String did2 = didService.getDidFromPublicKey(didPublicKey);
+        if (null == did2) {
+            System.out.println("Err didService.getDidFromPublicKey failed. result:");
+            return;
+        }
+        if (!did1.equals(did2)) {
+            System.out.println("Err didService.getDid failed. not equal!");
+
         }
     }
 
-    public void packDidRawData() throws Exception {
-        String rawData = didService.packDidRawData(didPrivateKey, didPropertyKey, didPropertyValue);
-        if (null == rawData) {
-            System.out.println("Err didService.packDidRawData failed.");
-            return;
-        }
-        System.out.println("DidService.packDidRawData rawData:" + rawData);
-    }
-
-    public void getDidPropertyByTxid() throws Exception {
-        didService.getDidPropertyByTxId("ig2MwSvwxR4vVPZCWEGwArTyQZYZK9pw2d",
-                "name",
-                "9e782aabfc41f1d22df67eb9d045e0b049067ce57467801fbe6226048cc1d2d0");
-
-    }
     public void setAndGetDidProperty() throws Exception {
-        ReturnMsgEntity ret = didService.setDidProperty(payPrivateKey, didPrivateKey, didPropertyKey, didPropertyValue);
+        String rawData = didService.packDidProperty(didPrivateKey, didPropertyKey, didPropertyValue);
+        if (null == rawData) {
+            System.out.println("Err didService.packDidProperty failed.");
+            return;
+        }
+        ReturnMsgEntity ret = didService.upChainByWallet(didNodeUrl, payPrivateKey, rawData);
         long status = ret.getStatus();
         if (status != RetCodeConfiguration.SUCC) {
-            System.out.println("Err didService.setDidProperty failed. result:" + JSON.toJSONString(ret.getResult()));
+            System.out.println("Err didService.upChainByWallet failed. result:" + JSON.toJSONString(ret.getResult()));
             return;
         }
 
@@ -109,81 +104,69 @@ public class ElaDidServiceApiSample {
         //wait 4 minutes for info add on chain!!
 //        TimeUnit.MINUTES.sleep(4);
 
-        ret = didService.getDidPropertyByTxId(did, didPropertyKey, txId);
+        ret = didService.getDidPropertyByTxid(didNodeUrl, did, didPropertyKey, txId);
         status = ret.getStatus();
         if (status != RetCodeConfiguration.SUCC) {
-            System.out.println("Err didService.getDidPropertyByTxId failed. result:" + JSON.toJSONString(ret.getResult()));
+            System.out.println("Err didService.getDidPropertyByTxid failed. result:" + JSON.toJSONString(ret.getResult()));
             return;
         }
         String propertyJson = (String) ret.getResult();
         String property = JSONObject.parseObject(propertyJson).getString(didPropertyKey);
-        System.out.println("Err didService.getDidPropertyByTxId property:" + property);
-    }
-    public void getDidProperty() throws Exception {
-        ReturnMsgEntity ret = didService.getDidPropertyByTxId("iV8D3SfqUZUomodfmarPHdnfCScnNMgipJ", "中文", "c80c10cb1412e2d013534da709dedc821b2e6dc2effd7c2896829c52c7064f7c");
-        long status = ret.getStatus();
-        if (status != RetCodeConfiguration.SUCC) {
-            System.out.println("Err didService.getDidPropertyByTxId failed. result:" + JSON.toJSONString(ret.getResult()));
-            return;
-        }
+        System.out.println("DidService.getDidPropertyByTxid property:" + property);
     }
 
     public void deleteDidProperty() throws Exception {
-        ReturnMsgEntity ret = didService.delDidProperty(payPrivateKey, didPrivateKey, didPropertyKey);
+        String rawData = didService.packDelDidProperty(didPrivateKey, didPropertyKey);
+        if (null == rawData) {
+            System.out.println("Err didService.packDelDidProperty failed.");
+            return;
+        }
+        ReturnMsgEntity ret = didService.upChainByWallet(didNodeUrl, payPrivateKey, rawData);
         long status = ret.getStatus();
         if (status != RetCodeConfiguration.SUCC) {
-            System.out.println("Err didService.delDidProperty failed. result:" + JSON.toJSONString(ret.getResult()));
+            System.out.println("Err didService.packDelDidProperty failed. result:" + JSON.toJSONString(ret.getResult()));
             return;
         }
 
         String txId = (String) ret.getResult();
         //wait 4 minutes for info add on chain!!
-        TimeUnit.MINUTES.sleep(4);
+//        TimeUnit.MINUTES.sleep(4);
 
-        ret = didService.getDidPropertyByTxId(did, didPropertyKey, txId);
+        ret = didService.getDidPropertyByTxid(didNodeUrl, did, didPropertyKey, txId);
         status = ret.getStatus();
         System.out.println("Status:" + status + " result:" + ret.getResult());
     }
 
     public void deleteDid() throws Exception {
-        ReturnMsgEntity ret = didService.destroyDid(payPrivateKey, didPrivateKey);
+        String rawData = didService.packDestroyDid(didPrivateKey);
+        if (null == rawData) {
+            System.out.println("Err didService.packDestroyDid failed.");
+            return;
+        }
+        ReturnMsgEntity ret = didService.upChainByWallet(didNodeUrl, payPrivateKey, rawData);
         long status = ret.getStatus();
         if (status != RetCodeConfiguration.SUCC) {
-            System.out.println("Err didService.destroyDid failed. result:" + JSON.toJSONString(ret.getResult()));
+            System.out.println("Err didService.packDestroyDid failed. result:" + JSON.toJSONString(ret.getResult()));
             return;
         }
         String txId = (String) ret.getResult();
 
         //wait 4 minutes for info add on chain!!
-        TimeUnit.MINUTES.sleep(4);
+//        TimeUnit.MINUTES.sleep(4);
 
-        ret = didService.getDidPropertyByTxId(did, didPropertyKey, txId);
+        ret = didService.getDidPropertyByTxid(didNodeUrl, did, didPropertyKey, txId);
         status = ret.getStatus();
         System.out.println("Status:" + status + " result:" + ret.getResult());
     }
 
-    public void transferEla(){
-        ElaDidServiceImp elaDidService = new ElaDidServiceImp();
-        elaDidService.setElaNodeUrl("http://54.64.220.165:21334");
-        Map<String, Double> dst = new HashMap<>();
-        dst.put("ETLde1cpZJ8pgyrFUg7yjszQu26GJfzZ6C", 8.0);
-        List<String> srcPrivateKeys = new ArrayList<>();
-        srcPrivateKeys.add("96A10CEEAA43C7E93F122BDE8F84DB336DA4F6CEA92341E15864B390E1EB266D");
-        ReturnMsgEntity ret = elaDidService.transferEla(srcPrivateKeys, dst, ChainType.MAIN_DID_CROSS_CHAIN);
-    }
-
     public static void main(String[] args) throws Exception {
         ElaDidServiceApiSample sample = new ElaDidServiceApiSample();
-        sample.getDidPropertyByTxid();
-//        sample.createDid();
-//        sample.getPublicKey();
-//        sample.getDid();
-//        sample.signAndVerifyDidMessage();
-//        sample.packDidRawData();
-//        sample.setAndGetDidProperty();
-//        sample.deleteDidProperty();
-//        sample.deleteDid();
-//        sample.getDidProperty();
-//        sample.transferEla();
+        sample.createDid();
+        sample.getPublicKey();
+        sample.getDid();
+        sample.signAndVerifyDidMessage();
+        sample.setAndGetDidProperty();
+        sample.deleteDidProperty();
+        sample.deleteDid();
     }
 }

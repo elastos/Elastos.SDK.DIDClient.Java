@@ -1,10 +1,7 @@
 package sample.com.upChain;
 
 import com.alibaba.fastjson.JSON;
-import org.apache.shiro.crypto.hash.SimpleHash;
-import org.elastos.entity.ReturnMsgEntity;
 import org.elastos.service.ElaDidService;
-import org.elastos.service.ElaDidServiceImp;
 import org.elastos.util.HttpUtil;
 
 import java.util.*;
@@ -13,52 +10,38 @@ import java.util.concurrent.TimeUnit;
 
 public class UpChainSample {
 
-    //用户替换为所需链的对应节点信息
-    // private final String ELA_NODE_URL = "http://52.197.53.77:21604"; //正式DID链
-    private final String ELA_NODE_URL = "http://54.64.220.165:21604";   //测试DID链
-    //用户替换为 BLOCK AGENT 上链服务的URL
-    // private final String ELA_BLOCK_AGENT_URL = "https://api-wallet-did-mainnet.elastos.org"; //正式DID链上链服务
-    private final String ELA_BLOCK_AGENT_URL = "https://api-wallet-did-testnet.elastos.org";    //测试DID链上链服务 
-    //用户替换为DID EXPLORER 服务的URL
-    // private final String ELA_EXPLORER_URL = "http://sidebackend-mainnet.bbjb2qwn2i.ap-northeast-1.elasticbeanstalk.com"; //正式DID链浏览器服务
-    private final String ELA_EXPLORER_URL = "http://sidebackend-testnet.bbjb2qwn2i.ap-northeast-1.elasticbeanstalk.com";    //测试DID链浏览器服务 
+    //UserChange: BLOCK CHAIN AGENT service url
+    private final String ELA_BLOCK_AGENT_URL = "https://api-wallet-did-testnet.elastos.org";    //测试DID链上链服务
+    //UserChange: DID EXPLORER service url
+    private final String ELA_EXPLORER_URL = "https://api-wallet-did-testnet.elastos.org";    //测试DID链浏览器服务
 
-    //用户替换为自己的did信息
-    private String didPrivateKey = "";
-    private String didPublicKey = "";
-    private String did = "";
+    //UserChange: your did info
+    private String didPrivateKey = "02D0125FB262E3E7A7723394C3D8ADB86F68192329A4AE56A75F46B949566552";
+    private String didPublicKey = "0245E44ACDF97CD8B676C064B373B4FDD246456F3B391FC21BAF515A4E49FD5E24";
+    private String did = "ipHvyXxv9jkAjTDv8N9iSsiNtrgi1K4p1n";
 
-    //用户替换为自己从亦来云服务平台上获取的access key信息
-    private String acc_id = "unCZRceA8o7dbny";
-    private String acc_secret = "qtvb4PlRVGLYYYQxyLIo3OgyKI7kUL";
+    //UserChange: get from elastos baas platform. You can set null, if there is no need for some BLOCK CHAIN AGENT service
+    private String acc_id = null;
+    private String acc_secret = null;
 
     ElaDidService didService;
 
     public UpChainSample() {
-        didService = new ElaDidServiceImp();
-        didService.setElaNodeUrl(ELA_NODE_URL);
-    }
-
-    public void createDid() throws Exception {
-        String ret = didService.createDid();
-        Map data = JSON.parseObject(ret, Map.class);
-        didPrivateKey = (String) data.get("DidPrivateKey");
-        did = (String) data.get("DID");
-        didPublicKey = (String) data.get("DidPublicKey");
+        didService = new ElaDidService();
     }
 
     public String packDidRawData(String key, String value) {
-        String rawData = didService.packDidRawData(didPrivateKey, key, value);
+        String rawData = didService.packDidProperty(didPrivateKey, key, value);
         if (null == rawData) {
-            System.out.println("Err didService.packDidRawData failed.");
+            System.out.println("Err didService.packDidProperty failed.");
             return null;
         }
-        System.out.println("DidService.packDidRawData rawData:" + rawData);
+        System.out.println("DidService.packDidProperty rawData:" + rawData);
         return rawData;
     }
 
     public String putDataToElaChain(String rawData) {
-        String ret = didService.upChainByBlockAgent(acc_id, acc_secret, rawData);
+        String ret = didService.upChainByAgent(ELA_BLOCK_AGENT_URL, null, null, rawData);
         return ret;
     }
 
@@ -76,18 +59,12 @@ public class UpChainSample {
     public static void main(String[] args) throws Exception {
         UpChainSample sample = new UpChainSample();
 
-        sample.createDid();
+        String upChainDataKey = "Apps/E9AC59878569C187DF42B602A8FCBC2F439CB8769C71D7A4ABE913ECCBE8FEA26DF7457BFCC478CC81A92780584990DEEF7776E2E33B604F1DE3FF62308E2121/vername";
+        String upChainDataValue = "1.0.227";
 
-       String upChainDataKey = "My_notebooks";
-       List<String> didProperty = new ArrayList<>();
-       didProperty.add("Dell中文");
-       didProperty.add("Mac中文");
-       didProperty.add("Thinkpad中文");
-       String upChainDataValue = JSON.toJSONString(didProperty);
+        String rawData = sample.packDidRawData(upChainDataKey, upChainDataValue);
 
-       String rawData = sample.packDidRawData(upChainDataKey, upChainDataValue);
-
-       sample.putDataToElaChain(rawData);
+        sample.putDataToElaChain(rawData);
 
        //wait 3 minutes for info add on chain!!
        TimeUnit.MINUTES.sleep(4);

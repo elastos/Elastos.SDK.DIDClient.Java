@@ -6,7 +6,7 @@
 
   <groupId>org.elastos</groupId>
   <artifactId>did_client.lib</artifactId>
-  <version>0.0.4</version>
+  <version>1.0.0</version>
 
   <name>did_client.lib</name>
   <description>DID service client library</description>
@@ -26,9 +26,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:git://github.com/elastos/Elastos.ORG.DID.Service.git</connection>
-    <developerConnection>scm:git:ssh://github.com/elastos/Elastos.ORG.DID.Service.git</developerConnection>
-    <url>https://github.com/elastos/Elastos.ORG.DID.Service/tree/refactor_frontend</url>
+    <connection>scm:git:git://github.com/elastos/Elastos.SDK.DIDClient.Java.git</connection>
+    <developerConnection>scm:git:ssh://github.com/elastos/Elastos.SDK.DIDClient.Java.git</developerConnection>
+    <url>https://github.com/elastos/Elastos.SDK.DIDClient.Java</url>
   </scm>
   <distributionManagement>
     <snapshotRepository>
@@ -56,7 +56,7 @@
     <dependency>
         <groupId>org.elastos</groupId>
         <artifactId>wallet.lib</artifactId>
-        <version>0.0.9</version>
+        <version>0.1.0</version>
     </dependency>
     <dependency>
         <groupId>org.apache.commons</groupId>
