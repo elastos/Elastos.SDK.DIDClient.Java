@@ -2,8 +2,8 @@
 ---
 
 ## Introduction
-* DID CLIENT API, include DID and DID property management, sent data to chain, DID message sign/verify functions.
-* warning: Since software is written by humans, it can have bugs. Thus, if you have questions you are always welcome to issue your problem.
+* DID CLIENT API include DID and DID property management, sent data to block chain, DID message sign/verify functions.
+* WARNING: Since software is written by humans, it can have bugs. Thus, if you have questions you are always welcome to issue your problem.
 
 ------------
 ## useful links
