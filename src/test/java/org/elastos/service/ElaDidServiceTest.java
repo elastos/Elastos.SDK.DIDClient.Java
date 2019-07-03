@@ -3,6 +3,7 @@ package org.elastos.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import junit.framework.TestCase;
+import org.elastos.POJO.ElaChainType;
 import org.elastos.conf.RetCodeConfiguration;
 import org.elastos.ela.Ela;
 import org.elastos.entity.ReturnMsgEntity;
@@ -21,6 +22,9 @@ public class ElaDidServiceTest extends TestCase {
     String payPrivateKey = "17f9885d36ce7c646cd1d613708e9b375f81b81309fbdfbd922d0cd72faadb1b";
     String payPublicKey = "035ADEF4A1566BD30B2A89327ECC3DE9B876F9624AEBEDDA7725A24816125CE261";
     String payPublicAddr = "EJqsNp9qSWkX7wkkKeKnqeubok6FxuA9un";
+//    String payPrivateKey = "FEDF4265E4B459074754C4A09420A278C7316959A48EA964263E86DECECEF232";
+//    String payPublicKey = "033CAE6DF91E6A77313601FEF25BAB55B0A4362E399377B0B87661AE5A2CE95A81";
+//    String payPublicAddr = "EZdDnKBRnV8o77gjr1M3mWBLZqLA3WBjB7";
     String didPrivateKey = "";
     String didPublicKey = "";
     String did = "";
@@ -209,5 +213,18 @@ public class ElaDidServiceTest extends TestCase {
         ret = didService.getDidPropertyByTxid(didNodeUrl, did, didPropertyKey, txId);
         status = ret.getStatus();
         assertEquals("Err after del did property, didService.getDidPropertyByTxid should not get info. result:" + JSON.toJSONString(ret.getResult()), status, RetCodeConfiguration.NOT_FOUND);
+    }
+
+    @Test
+    public void testTransferEla() throws Exception {
+
+        List<String> payPrivateKeys = new ArrayList<>();
+        payPrivateKeys.add(payPrivateKey);
+        Map<String, Double> dstAddrAndEla = new HashMap<>();
+//        dstAddrAndEla.put("EJqsNp9qSWkX7wkkKeKnqeubok6FxuA9un", 0.01);
+        dstAddrAndEla.put("EZdDnKBRnV8o77gjr1M3mWBLZqLA3WBjB7", 0.01);
+        ReturnMsgEntity ret = didService.transferEla(didNodeUrl, ElaChainType.DID_CHAIN, payPrivateKeys, ElaChainType.DID_CHAIN, dstAddrAndEla);
+        long status = ret.getStatus();
+        assertEquals("Err didService.transferEla failed. result:" + JSON.toJSONString(ret.getResult()), status, RetCodeConfiguration.SUCC);
     }
 }

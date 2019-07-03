@@ -159,14 +159,25 @@ public class ElaDidServiceApiSample {
         System.out.println("Status:" + status + " result:" + ret.getResult());
     }
 
+    public void getDidProperty() throws Exception {
+        ReturnMsgEntity ret = didService.getDidPropertyByTxid("http://54.64.220.165:21604", "iYBNS46VsgLGgBmYptChzAMNhQtyAviYvj", "test2_key", "07f04f1af782b74247dcab71a55e58209dc5e5aac13a46b8aa3a761d45ce2e47");
+        long status = ret.getStatus();
+        if (status != RetCodeConfiguration.SUCC) {
+            System.out.println("Err didService.getDidPropertyByTxid failed. result:" + JSON.toJSONString(ret.getResult()));
+            return;
+        }
+        System.out.println("DidService.getDidPropertyByTxid property:" + ret.getResult());
+    }
+
     public static void main(String[] args) throws Exception {
         ElaDidServiceApiSample sample = new ElaDidServiceApiSample();
-        sample.createDid();
-        sample.getPublicKey();
-        sample.getDid();
-        sample.signAndVerifyDidMessage();
-        sample.setAndGetDidProperty();
-        sample.deleteDidProperty();
-        sample.deleteDid();
+//        sample.createDid();
+//        sample.getPublicKey();
+//        sample.getDid();
+//        sample.signAndVerifyDidMessage();
+//        sample.setAndGetDidProperty();
+//        sample.deleteDidProperty();
+//        sample.deleteDid();
+        sample.getDidProperty();
     }
 }

@@ -6,7 +6,7 @@
 
   <groupId>org.elastos</groupId>
   <artifactId>did_client.lib</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 
   <name>did_client.lib</name>
   <description>DID service client library</description>

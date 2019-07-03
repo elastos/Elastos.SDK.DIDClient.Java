@@ -10,7 +10,6 @@ import com.alibaba.fastjson.JSON;
 import org.elastos.conf.RetCodeConfiguration;
 import org.elastos.entity.ChainType;
 import org.elastos.entity.Errors;
-import org.elastos.entity.RawTxEntity;
 import org.elastos.entity.ReturnMsgEntity;
 import org.elastos.exception.ApiRequestDataException;
 import org.elastos.util.HttpKit;
@@ -18,6 +17,7 @@ import org.elastos.util.ela.ElaKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -64,7 +64,7 @@ public class DidBackendService {
         }
     }
 
-    public List<Map> getUtxoListByAddr(String address, ChainType type) {
+    public List<Map> getUtxoListByAddr(String address) {
 
         checkAddr(address);
 
@@ -84,14 +84,17 @@ public class DidBackendService {
         }
     }
 
-    public ReturnMsgEntity sendRawTransaction(String rawTx, ChainType type) {
+    public ReturnMsgEntity sendRawTransaction(String rawTx) {
 
-        RawTxEntity entity = new RawTxEntity();
-        entity.setData(rawTx);
-        entity.setType(type);
-        entity.setType(ChainType.MAIN_CHAIN);
+        Map<String, String> entity = new HashMap<>();
+        entity.put("method", "sendrawtransaction");
+        entity.put("data", rawTx);
+//        RawTxEntity entity2 = new RawTxEntity();
+//        entity2.setData(rawTx);
+//        entity2.setType(ChainType.MAIN_CHAIN);
 
         String jsonEntity = JSON.toJSONString(entity);
+//        String jsonEntity2 = JSON.toJSONString(entity2);
         System.out.println("tx send data:" + jsonEntity);
         ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.POST, getDidPrefix() + transaction, jsonEntity);
         return msgEntity;

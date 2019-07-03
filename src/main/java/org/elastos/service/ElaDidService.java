@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.crypto.hash.SimpleHash;
 import org.eclipse.jetty.util.StringUtil;
 import org.elastos.POJO.DidEntity;
+import org.elastos.POJO.ElaChainType;
 import org.elastos.conf.DidConfiguration;
 import org.elastos.conf.RetCodeConfiguration;
 import org.elastos.ela.ECKey;
@@ -374,8 +375,9 @@ public class ElaDidService {
      */
     public ReturnMsgEntity upChainByWallet(String nodeUrl, String payWalletPrivateKey, String rawData) {
         //Pack data to tx for record.
-        ElaTransaction transaction = new ElaTransaction(nodeUrl, ChainType.DID_SIDECHAIN, rawData);
-
+        ElaTransaction transaction = new ElaTransaction();
+        transaction.setChainInfo(nodeUrl, ElaChainType.DID_CHAIN, ElaChainType.DID_CHAIN);
+        transaction.setMemo(rawData);
         String sendAddr = Ela.getAddressFromPrivate(payWalletPrivateKey);
         transaction.addSender(sendAddr, payWalletPrivateKey);
         //Transfer ela to sender itself. the only record payment is miner FEE.
@@ -476,11 +478,10 @@ public class ElaDidService {
         return null;
     }
 
-    @Deprecated
-    public ReturnMsgEntity transferEla(String nodeUrl, List<String> srcPrivateKeys, Map<String, Double> dstAddrAndEla, ChainType chainType) {
-        ElaTransaction transaction = new ElaTransaction(nodeUrl, chainType, "");
-
-        for (String key : srcPrivateKeys) {
+    public ReturnMsgEntity transferEla(String nodeUrl, ElaChainType srcChainType, List<String> srcWalletPrivateKeys, ElaChainType dstChainType, Map<String, Double> dstAddrAndEla) {
+        ElaTransaction transaction = new ElaTransaction();
+        transaction.setChainInfo(nodeUrl, srcChainType, dstChainType);
+        for (String key : srcWalletPrivateKeys) {
             String sendAddr = Ela.getAddressFromPrivate(key);
             transaction.addSender(sendAddr, key);
         }

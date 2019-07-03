@@ -8,7 +8,9 @@ package org.elastos.service.ela;
 
 import com.alibaba.fastjson.JSON;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.util.StringUtil;
+import org.elastos.POJO.ElaChainType;
 import org.elastos.api.SingleSignTransaction;
 import org.elastos.conf.BasicConfiguration;
 import org.elastos.conf.DidConfiguration;
@@ -30,13 +32,11 @@ public class ElaTransaction {
         String address;
         String privateKey;
         List<Map> utxoList;
-        ChainType chainType;
 
-        Sender(String addr, String priKey, ChainType type) {
+        Sender(String addr, String priKey) {
             address = addr;
             privateKey = priKey;
-            chainType = type;
-            utxoList = didBackendService.getUtxoListByAddr(address, type);
+            utxoList = didBackendService.getUtxoListByAddr(address);
             if (utxoList == null) {
                 utxoList = new ArrayList<>();
             }
@@ -57,15 +57,16 @@ public class ElaTransaction {
     private DidBackendService didBackendService = new DidBackendService();
     private List<Sender> senderList = new ArrayList<>();
     private List<Receiver> receiverList = new ArrayList<>();
-    private String memo = null;
+    private String memo = "";
+    private Double totalFee = 0.0;
     private ChainType chainType = null;
-    private Double totalFee = null;
+    private ElaChainType srcChainType = null;
+    private ElaChainType dstChainType = null;
 
-    public ElaTransaction(String nodeUrl, ChainType type, String memoInput) {
-        chainType = type;
-        memo = memoInput;
-        totalFee = 0.0;
+    public void setChainInfo(String nodeUrl, ElaChainType srcChain, ElaChainType dstChain) {
         didBackendService.setDidPrefix(nodeUrl);
+        srcChainType = srcChain;
+        dstChainType = dstChain;
     }
 
     public String getMemo() {
@@ -74,14 +75,6 @@ public class ElaTransaction {
 
     public void setMemo(String memo) {
         this.memo = memo;
-    }
-
-    public ChainType getChainType() {
-        return chainType;
-    }
-
-    public void setChainType(ChainType chainType) {
-        this.chainType = chainType;
     }
 
     public String getSenderList() {
@@ -97,7 +90,7 @@ public class ElaTransaction {
     }
 
     public void addSender(String addr, String priKey) {
-        this.senderList.add(new Sender(addr, priKey, chainType));
+        this.senderList.add(new Sender(addr, priKey));
     }
 
     public void addReceiver(String addr, double fee) {
@@ -109,8 +102,9 @@ public class ElaTransaction {
 
         if (receiverList.isEmpty()
                 || senderList.isEmpty()
-                || null == chainType
-                || null == totalFee) {
+                || StringUtils.isBlank(didBackendService.getDidPrefix())
+                || (null == srcChainType)
+                || (null == dstChainType)) {
             throw new RuntimeException("Not enough transaction parameter");
         }
 
@@ -127,7 +121,15 @@ public class ElaTransaction {
         String txHash = (String) tx.get("txHash");
         logger.info("rawTx:" + rawTx + ", txHash :" + txHash);
 
-        return didBackendService.sendRawTransaction(rawTx, chainType);
+        return didBackendService.sendRawTransaction(rawTx);
+    }
+
+    private boolean isSameChain(ElaChainType srcChain, ElaChainType dstChain) {
+        if (srcChain == dstChain) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -138,12 +140,10 @@ public class ElaTransaction {
      */
     private String createRawTx() throws Exception {
 
-        if ((chainType == ChainType.MAIN_DID_CROSS_CHAIN) || (chainType == ChainType.DID_MAIN_CROSS_CHAIN)) {
-            return createCrossChainRawTx();
-        } else if ((chainType == ChainType.MAIN_CHAIN) || (chainType == ChainType.DID_SIDECHAIN)) {
+        if (isSameChain(srcChainType, dstChainType)) {
             return createSameChainRawTx();
         } else {
-            throw new ApiRequestDataException("no such transfer type");
+            return createCrossChainRawTx();
         }
 
     }
@@ -204,16 +204,24 @@ public class ElaTransaction {
         return null;
     }
 
-    private void dealCrossChainTxOutputs(Map<String, Object> tx, double spendMoney) {
-        List utxoOutputsArray = new ArrayList<>();
-        Map<String, Object> brokerOutputs = new HashMap<>();
-        if (chainType == ChainType.MAIN_DID_CROSS_CHAIN) {
-            brokerOutputs.put("address", DidConfiguration.MAIN_CHAIN_ADDRESS);
-        } else if (chainType == ChainType.DID_MAIN_CROSS_CHAIN) {
-            brokerOutputs.put("address", DidConfiguration.BURN_ADDRESS);
+
+    String getBrokerAddr(ElaChainType srcChain, ElaChainType dstChain) {
+        if ((ElaChainType.ELA_CHAIN == srcChain)
+                && (ElaChainType.DID_CHAIN == dstChain)) {
+            return DidConfiguration.MAIN_CHAIN_ADDRESS;
+        } else if ((ElaChainType.DID_CHAIN == srcChain)
+                && (ElaChainType.ELA_CHAIN == dstChain)) {
+            return DidConfiguration.BURN_ADDRESS;
         } else {
             throw new ApiRequestDataException("no such transfer type");
         }
+    }
+
+    private void dealCrossChainTxOutputs(Map<String, Object> tx, double spendMoney) {
+        List utxoOutputsArray = new ArrayList<>();
+        Map<String, Object> brokerOutputs = new HashMap<>();
+        String brokerAddr = getBrokerAddr(srcChainType, dstChainType);
+        brokerOutputs.put("address", brokerAddr);
         brokerOutputs.put("amount", Math.round((totalFee + BasicConfiguration.CROSS_CHAIN_FEE) * BasicConfiguration.ONE_ELA));
         utxoOutputsArray.add(brokerOutputs);
 
