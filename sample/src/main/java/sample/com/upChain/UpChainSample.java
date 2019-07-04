@@ -4,16 +4,15 @@ import com.alibaba.fastjson.JSON;
 import org.elastos.service.ElaDidService;
 import org.elastos.util.HttpUtil;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 
 public class UpChainSample {
 
-    //UserChange: BLOCK CHAIN AGENT service url
-    private final String ELA_BLOCK_AGENT_URL = "https://api-wallet-did-testnet.elastos.org";    //测试DID链上链服务
-    //UserChange: DID EXPLORER service url
-    private final String ELA_EXPLORER_URL = "https://api-wallet-did-testnet.elastos.org";    //测试DID链浏览器服务
+    //UserChange: Elastos did service url
+    private final String ELA_DID_SERVICE_URL = "https://api-wallet-did-testnet.elastos.org";    //ELASTOS DID服务 URL
 
     //UserChange: your did info
     private String didPrivateKey = "02D0125FB262E3E7A7723394C3D8ADB86F68192329A4AE56A75F46B949566552";
@@ -41,12 +40,22 @@ public class UpChainSample {
     }
 
     public String putDataToElaChain(String rawData) {
-        String ret = didService.upChainByAgent(ELA_BLOCK_AGENT_URL, null, null, rawData);
+        String ret = didService.upChainByAgent(ELA_DID_SERVICE_URL, null, null, rawData);
         return ret;
     }
 
     public String getDataFromElaChain(String key) {
-        String response = HttpUtil.get(ELA_EXPLORER_URL + "/api/1/didexplorer/did/" + did + "/property?key=" + key, null);
+        String url = ELA_DID_SERVICE_URL + "/api/1/didexplorer/did/" + did + "/property?key=";
+        try {
+            url += java.net.URLEncoder.encode(key, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        String response = HttpUtil.get(url, null);
+        if (null == response) {
+            System.out.print("Err: no response.");
+            return null;
+        }
         Map<String, Object> msg = (Map<String, Object>) JSON.parse(response);
         if ((int) msg.get("status") == 200) {
             return (String) msg.get("result");
