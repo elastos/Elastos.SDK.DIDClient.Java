@@ -89,12 +89,8 @@ public class DidBackendService {
         Map<String, String> entity = new HashMap<>();
         entity.put("method", "sendrawtransaction");
         entity.put("data", rawTx);
-//        RawTxEntity entity2 = new RawTxEntity();
-//        entity2.setData(rawTx);
-//        entity2.setType(ChainType.MAIN_CHAIN);
 
         String jsonEntity = JSON.toJSONString(entity);
-//        String jsonEntity2 = JSON.toJSONString(entity2);
         System.out.println("tx send data:" + jsonEntity);
         ReturnMsgEntity msgEntity = elaReqChainData(ReqMethod.POST, getDidPrefix() + transaction, jsonEntity);
         return msgEntity;

@@ -111,7 +111,6 @@ public class ElaTransaction {
         String txJson = createRawTx();
         JSONObject ob = JSONObject.fromObject(txJson);
         Object txData = ob.get("Result");
-//        Object txData = ((Map<String, Object>) JSON.parse(txJson)).get("Result");
         if ((txData instanceof Map) == false) {
 
             throw new ApiRequestDataException("Not valid Data to create raw tx");
