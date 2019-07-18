@@ -171,13 +171,13 @@ public class ElaDidServiceApiSample {
 
     public static void main(String[] args) throws Exception {
         ElaDidServiceApiSample sample = new ElaDidServiceApiSample();
-//        sample.createDid();
+        sample.createDid();
 //        sample.getPublicKey();
 //        sample.getDid();
 //        sample.signAndVerifyDidMessage();
-//        sample.setAndGetDidProperty();
+        sample.setAndGetDidProperty();
 //        sample.deleteDidProperty();
 //        sample.deleteDid();
-        sample.getDidProperty();
+//        sample.getDidProperty();
     }
 }
