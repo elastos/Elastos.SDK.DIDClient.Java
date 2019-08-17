@@ -495,7 +495,7 @@ public class ElaDidService {
             ret = transaction.transfer();
         } catch (Exception e) {
             e.printStackTrace();
-            ret = new ReturnMsgEntity().setResult("Err: transferEla transfer failed").setStatus(RetCodeConfiguration.PROCESS_ERROR);
+            ret = new ReturnMsgEntity().setResult("Err: transferEla transfer failed"+e.getMessage()).setStatus(RetCodeConfiguration.PROCESS_ERROR);
         }
 
         return ret;
