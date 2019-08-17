@@ -7,6 +7,7 @@
 package org.elastos.service.ela;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.elastos.conf.RetCodeConfiguration;
 import org.elastos.entity.ChainType;
 import org.elastos.entity.Errors;
@@ -119,12 +120,13 @@ public class DidBackendService {
             response = HttpKit.post(url, data);
         }
 
-        Map<String, Object> msg = (Map<String, Object>) JSON.parse(response);
+        JSONObject msg =  JSON.parseObject(response);
         long status;
-        if ((int) msg.get("Error") == 0) {
+        int err = msg.getInteger("Error");
+        if (err == 0) {
             status = RetCodeConfiguration.SUCC;
         } else {
-            status = RetCodeConfiguration.PROCESS_ERROR;
+            status = err;
         }
         return new ReturnMsgEntity().setResult(msg.get("Result")).setStatus(status);
     }
