@@ -13,7 +13,7 @@ import org.elastos.entity.ChainType;
 import org.elastos.entity.Errors;
 import org.elastos.entity.ReturnMsgEntity;
 import org.elastos.exception.ApiRequestDataException;
-import org.elastos.util.HttpKit;
+import org.elastos.util.HttpUtil;
 import org.elastos.util.ela.ElaKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,9 +115,12 @@ public class DidBackendService {
             if (null != data) {
                 str += data;
             }
-            response = HttpKit.get(str);
+            response = HttpUtil.get(str, null);
         } else {
-            response = HttpKit.post(url, data);
+            response = HttpUtil.post(url, data, null);
+        }
+        if (null == response) {
+            return new ReturnMsgEntity().setStatus(RetCodeConfiguration.PROCESS_ERROR);
         }
 
         JSONObject msg =  JSON.parseObject(response);
