@@ -19,9 +19,11 @@ import java.util.concurrent.TimeUnit;
 
 public class ElaDidServiceTest extends TestCase {
     String didNodeUrl = "http://54.64.220.165:21334";
+
     String payPrivateKey = "17f9885d36ce7c646cd1d613708e9b375f81b81309fbdfbd922d0cd72faadb1b";
     String payPublicKey = "035ADEF4A1566BD30B2A89327ECC3DE9B876F9624AEBEDDA7725A24816125CE261";
     String payPublicAddr = "EJqsNp9qSWkX7wkkKeKnqeubok6FxuA9un";
+
 //    String payPrivateKey = "FEDF4265E4B459074754C4A09420A278C7316959A48EA964263E86DECECEF232";
 //    String payPublicKey = "033CAE6DF91E6A77313601FEF25BAB55B0A4362E399377B0B87661AE5A2CE95A81";
 //    String payPublicAddr = "EZdDnKBRnV8o77gjr1M3mWBLZqLA3WBjB7";
@@ -116,7 +118,7 @@ public class ElaDidServiceTest extends TestCase {
     public void testGetDid() throws Exception {
         String did1 = didService.getDidFromPrivateKey(didPrivateKey);
         assertNotNull(did1);
-        String did2 = didService.getDidFromPrivateKey(didPublicKey);
+        String did2 = didService.getDidFromPublicKey(didPublicKey);
         assertNotNull(did2);
         assertEquals(did1, did2);
     }
@@ -146,7 +148,7 @@ public class ElaDidServiceTest extends TestCase {
         assertEquals("Err didService.upChainByWallet failed. result:" + JSON.toJSONString(ret.getResult()), status, RetCodeConfiguration.SUCC);
 
         //wait 3 minutes for info add on chain!!
-        TimeUnit.MINUTES.sleep(3);
+//        TimeUnit.MINUTES.sleep(3);
 
         String txId = (String) ret.getResult();
         ret = didService.getDidPropertyByTxid(didNodeUrl, did, didPropertyKey, txId);
@@ -221,8 +223,8 @@ public class ElaDidServiceTest extends TestCase {
         List<String> payPrivateKeys = new ArrayList<>();
         payPrivateKeys.add(payPrivateKey);
         Map<String, Double> dstAddrAndEla = new HashMap<>();
-//        dstAddrAndEla.put("EJqsNp9qSWkX7wkkKeKnqeubok6FxuA9un", 0.01);
-        dstAddrAndEla.put("EZdDnKBRnV8o77gjr1M3mWBLZqLA3WBjB7", 0.01);
+        dstAddrAndEla.put("EZdDnKBRnV8o77gjr1M3mWBLZqLA3WBjB7", 0.1);
+//        dstAddrAndEla.put("Efmx8xgGeyWiQgEcpHonj8Xya3dxDXnzDx", 0.2);
         ReturnMsgEntity ret = didService.transferEla(didNodeUrl, ElaChainType.DID_CHAIN, payPrivateKeys, ElaChainType.DID_CHAIN, dstAddrAndEla);
         long status = ret.getStatus();
         assertEquals("Err didService.transferEla failed. result:" + JSON.toJSONString(ret.getResult()), status, RetCodeConfiguration.SUCC);
