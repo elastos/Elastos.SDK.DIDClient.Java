@@ -6,7 +6,7 @@
 
   <groupId>org.elastos</groupId>
   <artifactId>did_client.lib</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
 
   <name>did_client.lib</name>
   <description>DID service client library</description>
@@ -97,6 +97,11 @@
       <groupId>org.apache.shiro</groupId>
       <artifactId>shiro-core</artifactId>
       <version>1.4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.web3j</groupId>
+      <artifactId>core</artifactId>
+      <version>4.2.0</version>
     </dependency>
   </dependencies>
 

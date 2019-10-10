@@ -14,6 +14,7 @@ import org.elastos.POJO.ElaChainType;
 import org.elastos.api.SingleSignTransaction;
 import org.elastos.conf.BasicConfiguration;
 import org.elastos.conf.DidConfiguration;
+import org.elastos.conf.EthConfiguration;
 import org.elastos.entity.ChainType;
 import org.elastos.entity.Errors;
 import org.elastos.entity.ReturnMsgEntity;
@@ -123,9 +124,14 @@ public class ElaTransaction {
         return didBackendService.sendRawTransaction(rawTx);
     }
 
-    private boolean isSameChain(ElaChainType srcChain, ElaChainType dstChain) {
+    private boolean isSupportSameChain(ElaChainType srcChain, ElaChainType dstChain) {
         if (srcChain == dstChain) {
-            return true;
+            if((srcChain == ElaChainType.ETH_CHAIN)
+                ||(srcChain == ElaChainType.ETH_TESTCHAIN)){
+                return false;
+            } else {
+                return true;
+            }
         } else {
             return false;
         }
@@ -139,7 +145,7 @@ public class ElaTransaction {
      */
     private String createRawTx() throws Exception {
 
-        if (isSameChain(srcChainType, dstChainType)) {
+        if (isSupportSameChain(srcChainType, dstChainType)) {
             return createSameChainRawTx();
         } else {
             return createCrossChainRawTx();
@@ -203,14 +209,31 @@ public class ElaTransaction {
         return null;
     }
 
-
     String getBrokerAddr(ElaChainType srcChain, ElaChainType dstChain) {
         if ((ElaChainType.ELA_CHAIN == srcChain)
                 && (ElaChainType.DID_CHAIN == dstChain)) {
-            return DidConfiguration.MAIN_CHAIN_ADDRESS;
+            return DidConfiguration.ELA_MAIN_CHAIN_ADDRESS;
         } else if ((ElaChainType.DID_CHAIN == srcChain)
                 && (ElaChainType.ELA_CHAIN == dstChain)) {
-            return DidConfiguration.BURN_ADDRESS;
+            return DidConfiguration.DID_SIDE_CHAIN_BURN_ADDRESS;
+        } else if ((ElaChainType.ELA_TESTCHAIN == srcChain)
+                && (ElaChainType.DID_TESTCHAIN == dstChain)) {
+            return DidConfiguration.ELA_MAIN_CHAIN_ADDRESS;
+        } else if ((ElaChainType.DID_TESTCHAIN == srcChain)
+                && (ElaChainType.ELA_TESTCHAIN == dstChain)) {
+            return DidConfiguration.DID_SIDE_CHAIN_BURN_ADDRESS;
+        } else if ((ElaChainType.ELA_CHAIN == srcChain)
+                && (ElaChainType.ETH_CHAIN == dstChain)) {
+            return EthConfiguration.ELA_MAIN_CHAIN_ADDRESS;
+        } else if ((ElaChainType.ETH_CHAIN == srcChain)
+                && (ElaChainType.ELA_CHAIN == dstChain)) {
+            return EthConfiguration.ETH_SIDE_CHAIN_BURN_ADDRESS;
+        } else if ((ElaChainType.ELA_TESTCHAIN == srcChain)
+                && (ElaChainType.ETH_TESTCHAIN == dstChain)) {
+            return EthConfiguration.ELA_MAIN_TESTCHAIN_ADDRESS;
+        } else if ((ElaChainType.ETH_TESTCHAIN == srcChain)
+                && (ElaChainType.ELA_TESTCHAIN == dstChain)) {
+            return EthConfiguration.ETH_SIDE_TESTCHAIN_BURN_ADDRESS;
         } else {
             throw new ApiRequestDataException("no such transfer type");
         }

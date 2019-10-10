@@ -15,6 +15,6 @@ package org.elastos.conf;
  */
 public interface DidConfiguration {
     public static final double FEE = 0.0001;
-    public static final String MAIN_CHAIN_ADDRESS = "XKUh4GLhFJiqAMTF6HyWQrV9pK9HcGUdfJ";
-    public static final String BURN_ADDRESS = "0000000000000000000000000000000000";
+    public static final String ELA_MAIN_CHAIN_ADDRESS = "XKUh4GLhFJiqAMTF6HyWQrV9pK9HcGUdfJ";
+    public static final String DID_SIDE_CHAIN_BURN_ADDRESS = "0000000000000000000000000000000000";
 }
