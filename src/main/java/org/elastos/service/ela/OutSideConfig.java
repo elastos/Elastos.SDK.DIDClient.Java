@@ -11,7 +11,6 @@ import java.util.Properties;
 
 public class OutSideConfig {
     private static Properties properties;
-    private static Logger logger = LoggerFactory.getLogger(OutSideConfig.class);
 
     public static boolean readOutSide() {
         try {
@@ -21,9 +20,9 @@ public class OutSideConfig {
                     + "/conf/ela.did.properties";
             InputStream in = new BufferedInputStream(new FileInputStream(filePath));
             properties.load(in);
-            logger.info("Ela DID configure by ela.did.properties");
+            System.out.println("Ela DID configure by ela.did.properties");
         } catch (IOException e) {
-            logger.info("Ela DID node url will input by api.");
+            System.out.println("Ela DID node url will input by api.");
             return false;
         }
         return true;

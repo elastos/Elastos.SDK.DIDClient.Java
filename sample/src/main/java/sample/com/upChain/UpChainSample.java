@@ -1,6 +1,7 @@
 package sample.com.upChain;
 
 import com.alibaba.fastjson.JSON;
+import org.elastos.ela.Ela;
 import org.elastos.service.ElaDidService;
 import org.elastos.util.HttpUtil;
 
@@ -11,26 +12,21 @@ import java.util.concurrent.TimeUnit;
 
 public class UpChainSample {
 
-    //UserChange: Elastos did service url
-    private final String ELA_DID_SERVICE_URL = "https://api-wallet-did-testnet.elastos.org";    //ELASTOS DID服务 URL
+    //UserChange: Elastos did chain service url
+//    private final String ELA_DID_SERVICE_URL = "https://api-wallet-did-testnet.elastos.org";    //ELASTOS DID链 测试网服务 URL
+    private final String ELA_DID_SERVICE_URL = "https://api-wallet-did.elastos.org";    //ELASTOS DID链 测试网服务 URL
 
     //UserChange: your did info
-    private String didPrivateKey = "02D0125FB262E3E7A7723394C3D8ADB86F68192329A4AE56A75F46B949566552";
-    private String didPublicKey = "0245E44ACDF97CD8B676C064B373B4FDD246456F3B391FC21BAF515A4E49FD5E24";
-    private String did = "ipHvyXxv9jkAjTDv8N9iSsiNtrgi1K4p1n";
+    private String didPrivateKey = "3C7BD426718F9534EC77E9183C06AA8DEE0B538866C9D66A6049A87C7B2415CD";
+    private String didPublicKey = "02C6A4571B21AFE6AD62E127CF25C0955C97817060E5DBC704D15D03B358CD67D8";
+    private String did = "iY2UzLhBPCxxTs9BfwHyGQWQiHo7u4FECM";
 
     //UserChange: get from elastos baas platform. You can set null, if there is no need for some BLOCK CHAIN AGENT service
     private String acc_id = null;
     private String acc_secret = null;
 
-    ElaDidService didService;
-
-    public UpChainSample() {
-        didService = new ElaDidService();
-    }
-
     public String packDidRawData(String key, String value) {
-        String rawData = didService.packDidProperty(didPrivateKey, key, value);
+        String rawData = ElaDidService.packDidProperty(didPrivateKey, key, value);
         if (null == rawData) {
             System.out.println("Err didService.packDidProperty failed.");
             return null;
@@ -40,7 +36,7 @@ public class UpChainSample {
     }
 
     public String putDataToElaChain(String rawData) {
-        String ret = didService.upChainByAgent(ELA_DID_SERVICE_URL, null, null, rawData);
+        String ret = ElaDidService.upChainByAgent(ELA_DID_SERVICE_URL, null, null, rawData);
         return ret;
     }
 
@@ -68,8 +64,8 @@ public class UpChainSample {
     public static void main(String[] args) throws Exception {
         UpChainSample sample = new UpChainSample();
 
-        String upChainDataKey = "Apps/E9AC59878569C187DF42B602A8FCBC2F439CB8769C71D7A4ABE913ECCBE8FEA26DF7457BFCC478CC81A92780584990DEEF7776E2E33B604F1DE3FF62308E2121/vername";
-        String upChainDataValue = "1.0.227";
+        String upChainDataKey = "PublicKey";
+        String upChainDataValue = "02C6A4571B21AFE6AD62E127CF25C0955C97817060E5DBC704D15D03B358CD67D8";
 
         String rawData = sample.packDidRawData(upChainDataKey, upChainDataValue);
 

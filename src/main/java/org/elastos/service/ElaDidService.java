@@ -12,26 +12,23 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.crypto.hash.SimpleHash;
 import org.eclipse.jetty.util.StringUtil;
-import org.elastos.POJO.DidEntity;
-import org.elastos.POJO.ElaChainType;
-import org.elastos.conf.DidConfiguration;
-import org.elastos.conf.RetCodeConfiguration;
+import org.elastos.POJO.*;
+import org.elastos.conf.BasicConfiguration;
+import org.elastos.constant.RetCode;
 import org.elastos.ela.ECKey;
 import org.elastos.ela.Ela;
 import org.elastos.ela.SignTool;
 import org.elastos.ela.Util;
-import org.elastos.entity.ChainType;
 import org.elastos.entity.Errors;
 import org.elastos.entity.MnemonicType;
-import org.elastos.entity.ReturnMsgEntity;
-import org.elastos.service.ela.DidBackendService;
+import org.elastos.exception.ElaDidServiceException;
+import org.elastos.service.ela.BackendService;
 import org.elastos.service.ela.ElaTransaction;
 import org.elastos.util.HttpUtil;
+import org.elastos.util.RetResult;
 import org.elastos.util.ela.ElaHdSupport;
 import org.elastos.util.ela.ElaKit;
 import org.elastos.util.ela.ElaSignTool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.web3j.crypto.CipherException;
 
 import javax.xml.bind.DatatypeConverter;
@@ -43,15 +40,22 @@ import java.util.*;
 
 public class ElaDidService {
     private static final String CHARSET = "UTF-8";
+    private BackendService backendService = new BackendService();
 
-    private static Logger logger = LoggerFactory.getLogger(ElaDidService.class);
+    public ElaDidService(String inNodeUrl, boolean isTestNet) {
+        if (null == inNodeUrl) {
+            throw new ElaDidServiceException("ElaDidService node url must not be null");
+        }
+        backendService.setPrefix(inNodeUrl);
+        backendService.setTestNet(isTestNet);
+    }
 
     /**
      * Create mnemonic to generate did
      *
      * @return mnemonic
      */
-    public String createMnemonic() {
+    public static String createMnemonic() {
         String mnemonic = ElaHdSupport.generateMnemonic(MnemonicType.ENGLISH);
         return mnemonic;
     }
@@ -61,19 +65,12 @@ public class ElaDidService {
      * @param index
      * @return Json string of did data: DidPrivateKey, DidPublicKey, Did
      */
-    public String createDid(String mnemonic, int index) {
-        String ret;
-        try {
-            ret = ElaHdSupport.generate(mnemonic, index);
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException | CipherException e) {
-            logger.error("Err: signDidMessage Parameter invalid.");
-            e.printStackTrace();
-            return null;
-        }
+    public static String createDid(String mnemonic, int index) throws InvalidKeySpecException, NoSuchAlgorithmException, CipherException {
+        String ret = ElaHdSupport.generate(mnemonic, index);
 
-        Map data = JSON.parseObject(ret, Map.class);
-        String privateKey = (String) data.get("privateKey");
-        String publicKey = (String) data.get("publicKey");
+        JSONObject data = JSON.parseObject(ret);
+        String privateKey = data.getString("privateKey");
+        String publicKey = data.getString("publicKey");
         String did = Ela.getIdentityIDFromPrivate(privateKey);
 
         Map<String, String> result = new HashMap<>();
@@ -85,28 +82,42 @@ public class ElaDidService {
     }
 
     /**
+     * @param mnemonic
+     * @param index
+     * @return DidCredentials
+     */
+    public static DidCredentials geneDidCredentials(String mnemonic, int index) throws InvalidKeySpecException, NoSuchAlgorithmException, CipherException {
+        String ret = ElaHdSupport.generate(mnemonic, index);
+        JSONObject data = JSON.parseObject(ret);
+
+        KeyPair keyPair = new KeyPair();
+
+        String privateKey = data.getString("privateKey");
+        keyPair.setPrivateKey(privateKey);
+        keyPair.setPublicKey(data.getString("publicKey"));
+        DidCredentials didCredentials = new DidCredentials();
+        didCredentials.setKeyPair(keyPair);
+        didCredentials.setDid(Ela.getIdentityIDFromPrivate(privateKey));
+        didCredentials.setAddress(Ela.getAddressFromPrivate(privateKey));
+        return didCredentials;
+    }
+
+    /**
      * Get a did signature of a message
      *
      * @param didPrivateKey
      * @param msg
      * @return signature
      */
-    public String signMessage(String didPrivateKey, String msg) {
+    public static String signMessage(String didPrivateKey, String msg) throws Exception {
         if (StringUtils.isAnyBlank(didPrivateKey,
                 msg)) {
-            logger.error("Err: signDidMessage Parameter invalid.");
+            System.out.println("Err: signDidMessage Parameter invalid.");
             return null;
         }
 
-        Map<String, Object> signDid;
-        try {
-            signDid = this.sign(didPrivateKey, msg);
-        } catch (Exception e) {
-            logger.error("Err: signDidMessage failed.");
-            return null;
-
-        }
-        logger.debug("signDidMessage signDid:{}", JSON.toJSONString(signDid));
+        Map<String, Object> signDid = sign(didPrivateKey, msg);
+        System.out.println("signDidMessage signDid:" + JSON.toJSONString(signDid));
         String sig = (String) signDid.get("sig");
         return sig;
     }
@@ -119,20 +130,20 @@ public class ElaDidService {
      * @param msg
      * @return bool
      */
-    public boolean verifyMessage(String didPublicKey, String sig, String msg) {
+    public static boolean verifyMessage(String didPublicKey, String sig, String msg) {
         if (StringUtils.isAnyBlank(didPublicKey,
                 msg,
                 sig)) {
-            logger.error("Err: verifyMessage parameter invalid");
+            System.out.println("Err: verifyMessage parameter invalid");
             return false;
         }
 
         try {
             String hexmsg = DatatypeConverter.printHexBinary(msg.getBytes(CHARSET));
-            boolean ret = this.verify(didPublicKey, sig, hexmsg);
+            boolean ret = verify(didPublicKey, sig, hexmsg);
             return ret;
         } catch (Exception e) {
-            logger.error("Err: verifyDidMessage failed.");
+            System.out.println("Err: verifyDidMessage failed.");
             return false;
         }
     }
@@ -143,9 +154,9 @@ public class ElaDidService {
      * @param didPrivateKey
      * @return didPublicKey
      */
-    public String getDidPublicKey(String didPrivateKey) {
+    public static String getDidPublicKey(String didPrivateKey) {
         if (StringUtils.isBlank(didPrivateKey)) {
-            logger.error("Err: getDidPublicKey Parameter invalid.");
+            System.out.println("Err: getDidPublicKey Parameter invalid.");
             return null;
         }
 
@@ -160,7 +171,7 @@ public class ElaDidService {
      * @param didPrivateKey
      * @return did
      */
-    public String getDidFromPrivateKey(String didPrivateKey) {
+    public static String getDidFromPrivateKey(String didPrivateKey) {
         if (StringUtils.isBlank(didPrivateKey)) {
             return null;
         }
@@ -175,7 +186,7 @@ public class ElaDidService {
      * @param publicKey
      * @return did
      */
-    public String getDidFromPublicKey(String publicKey) {
+    public static String getDidFromPublicKey(String publicKey) {
         if (StringUtils.isBlank(publicKey)) {
             return null;
         }
@@ -191,12 +202,12 @@ public class ElaDidService {
      * @param propertyValue
      * @return raw data for up chain
      */
-    public String packDidProperty(String didPrivateKey, String propertyKey, String propertyValue) {
+    public static String packDidProperty(String didPrivateKey, String propertyKey, String propertyValue) {
         if (StringUtils.isAnyBlank(
                 didPrivateKey,
                 propertyKey,
                 propertyValue)) {
-            logger.error("Err: packDidProperty parameter invalid");
+            System.out.println("Err: packDidProperty parameter invalid");
             return null;
         }
 
@@ -211,7 +222,6 @@ public class ElaDidService {
         didEntity.setDid(did);
         String raw = packDidEntity(didPrivateKey, didEntity);
         if (null == raw) {
-            logger.error("Err: packDidProperty packDidEntity failed");
             System.out.println("Err: packDidProperty packDidEntity failed");
         }
         return raw;
@@ -225,11 +235,10 @@ public class ElaDidService {
      * @param propertiesMap
      * @return raw data for up chain
      */
-    public String packDidProperties(String didPrivateKey, Map<String, String> propertiesMap) {
+    public static String packDidProperties(String didPrivateKey, Map<String, String> propertiesMap) {
         if (StringUtils.isBlank(didPrivateKey)
                 || (null == propertiesMap)
                 || (propertiesMap.isEmpty())) {
-            logger.error("Err: packDidProperty parameter invalid");
             System.out.println("Err: packDidProperty parameter invalid");
             return null;
         }
@@ -242,7 +251,6 @@ public class ElaDidService {
         didEntity.setDid(did);
         String raw = packDidEntity(didPrivateKey, didEntity);
         if (null == raw) {
-            logger.error("Err: packDidProperty packDidEntity failed");
             System.out.println("Err: packDidProperty packDidEntity failed");
         }
         return raw;
@@ -255,11 +263,11 @@ public class ElaDidService {
      * @param propertyKey
      * @return
      */
-    public String packDelDidProperty(String didPrivateKey, String propertyKey) {
+    public static String packDelDidProperty(String didPrivateKey, String propertyKey) {
         if (StringUtils.isAnyBlank(
                 didPrivateKey,
                 propertyKey)) {
-            logger.error("Err: packDelDidProperty parameter invalid");
+            System.out.println("Err: packDelDidProperty parameter invalid");
             return null;
         }
 
@@ -283,9 +291,9 @@ public class ElaDidService {
      * Generate a up chain raw data for deprecate did
      *
      * @param didPrivateKey
-     * @return raw date
+     * @return raw data
      */
-    public String packDestroyDid(String didPrivateKey) {
+    public static String packDestroyDid(String didPrivateKey) {
         if (StringUtils.isBlank(didPrivateKey)) {
             return null;
         }
@@ -308,7 +316,7 @@ public class ElaDidService {
      * @param rawData
      * @return txid
      */
-    public String upChainByAgent(String agentUrl, String accessId, String accessSecret, String rawData) {
+    public static String upChainByAgent(String agentUrl, String accessId, String accessSecret, String rawData) {
         Map<String, String> header = new HashMap<>();
         if (!StringUtils.isAnyBlank(accessId, accessSecret)) {
             header.put("X-Elastos-Agent-Auth", createAuthHeader(accessId, accessSecret));
@@ -319,16 +327,16 @@ public class ElaDidService {
             return null;
         }
 
-        Map<String, Object> msg = (Map<String, Object>) JSON.parse(response);
-        if ((int) msg.get("status") == 200) {
-            return (String) msg.get("result");
+        JSONObject msg = JSON.parseObject(response);
+        if (msg.getIntValue("status") == 200) {
+            return msg.getString("result");
         } else {
-            System.out.println("Err: block agent failed" + msg.get("result"));
+            System.out.println("Err: block agent failed" + msg.getString("result"));
             return null;
         }
     }
 
-    private String createAuthHeader(String acc_id, String acc_secret) {
+    private static String createAuthHeader(String acc_id, String acc_secret) {
         long time = new Date().getTime();
         String strTime = String.valueOf(time);
         SimpleHash hash = new SimpleHash("md5", acc_secret, strTime, 1);
@@ -341,8 +349,7 @@ public class ElaDidService {
         return X_Elastos_Agent_Auth_value;
     }
 
-
-    private void propertiesMapToList(Map<String, String> propertiesMap, List<DidEntity.DidProperty> properties) {
+    private static  void propertiesMapToList(Map<String, String> propertiesMap, List<DidEntity.DidProperty> properties) {
         propertiesMap.forEach((k, v) -> {
             DidEntity.DidProperty property = new DidEntity.DidProperty();
             property.setKey(k);
@@ -351,7 +358,7 @@ public class ElaDidService {
         });
     }
 
-    private String packDidEntity(String didPrivateKey, DidEntity didEntity) {
+    private static String packDidEntity(String didPrivateKey, DidEntity didEntity) {
         String msg = (JSON.toJSONString(didEntity));
         System.out.print("packDidEntity did entity:" + msg);
         Map<String, Object> signDid;
@@ -361,56 +368,52 @@ public class ElaDidService {
             return null;
         }
         String rawData = JSON.toJSONString(signDid);
-        logger.debug("rawData:{}", rawData);
         return rawData;
     }
 
     /**
      * Sent raw data to did chain use wallet to pay
      *
-     * @param nodeUrl             Did chain node url
      * @param payWalletPrivateKey
-     * @param rawData
+     * @param rawDidData
      * @return
      */
-    public ReturnMsgEntity upChainByWallet(String nodeUrl, String payWalletPrivateKey, String rawData) {
+    public RetResult<String> upChainByWallet(String payWalletPrivateKey, String rawDidData) {
         //Pack data to tx for record.
-        ElaTransaction transaction = new ElaTransaction();
-        transaction.setChainInfo(nodeUrl, ElaChainType.DID_CHAIN, ElaChainType.DID_CHAIN);
-        transaction.setMemo(rawData);
+        ElaTransaction transaction = new ElaTransaction(backendService, ElaChainType.DID_CHAIN, ElaChainType.DID_CHAIN);
+        transaction.setMemo(rawDidData);
         String sendAddr = Ela.getAddressFromPrivate(payWalletPrivateKey);
-        transaction.addSender(sendAddr, payWalletPrivateKey);
+        RetResult retSender = transaction.addSender(sendAddr, payWalletPrivateKey);
+        if (retSender.getCode() != RetCode.SUCC) {
+            return RetResult.retErr(retSender.getCode(), "Err: sentRawDataToChain " + retSender.getMsg());
+        }
         //Transfer ela to sender itself. the only record payment is miner FEE.
-        transaction.addReceiver(sendAddr, DidConfiguration.FEE);
+        transaction.addReceiver(sendAddr, BasicConfiguration.FEE);
         try {
-            ReturnMsgEntity ret = transaction.transfer();
+            RetResult<String> ret = transaction.transfer();
             return ret;
         } catch (Exception e) {
             e.printStackTrace();
-            return new ReturnMsgEntity().setResult("Err: sentRawDataToChain transfer failed").setStatus(RetCodeConfiguration.PROCESS_ERROR);
+            return RetResult.retErr(RetCode.INTERNAL_EXCEPTION, "Err: sentRawDataToChain exception:" + e.getMessage());
         }
     }
 
     /**
      * Get did property by txid
      *
-     * @param nodeUrl     Did chain node url
      * @param did
      * @param propertyKey
      * @param txId
-     * @return
+     * @return RetResult
      */
-    public ReturnMsgEntity getDidPropertyByTxid(String nodeUrl, String did, String propertyKey, String txId) {
-        DidBackendService didBackendService = new DidBackendService();
-        didBackendService.setDidPrefix(nodeUrl);
-
+    public RetResult<String> getDidPropertyByTxid(String did, String propertyKey, String txId) {
         if (StringUtils.isAnyBlank(did, propertyKey, txId)) {
-            return new ReturnMsgEntity().setResult("Err: getDidPropertyByTxid Parameter invalid.").setStatus(RetCodeConfiguration.BAD_REQUEST);
+            return RetResult.retErr(RetCode.BAD_REQUEST_PARAMETER, "Err: getDidPropertyByTxid Parameter invalid.");
         }
 
-        Map<String, Object> tx = didBackendService.getTransaction(txId, ChainType.DID_SIDECHAIN);
+        Map<String, Object> tx = backendService.getTransaction(txId);
         if (null == tx) {
-            return new ReturnMsgEntity().setResult(Errors.DID_NO_SUCH_INFO.val()).setStatus(RetCodeConfiguration.NOT_FOUND);
+            return RetResult.retErr(RetCode.NOT_FOUND, Errors.DID_NO_SUCH_INFO.val());
         }
 
         try {
@@ -418,14 +421,13 @@ public class ElaDidService {
             if (null != property) {
                 JSONObject ret = new JSONObject();
                 ret.put(propertyKey, property);
-                return new ReturnMsgEntity().setResult(ret.toJSONString()).setStatus(RetCodeConfiguration.SUCC);
+                return RetResult.retOk(ret.toJSONString());
             } else {
-                return new ReturnMsgEntity().setResult(Errors.DID_NO_SUCH_INFO.val()).setStatus(RetCodeConfiguration.NOT_FOUND);
+                return RetResult.retErr(RetCode.NOT_FOUND, Errors.DID_NO_SUCH_INFO.val());
             }
         } catch (Exception ex) {
-            logger.warn(ex.getMessage());
             ex.printStackTrace();
-            return new ReturnMsgEntity().setResult(Errors.DID_NO_SUCH_INFO.val()).setStatus(RetCodeConfiguration.NOT_FOUND);
+            return RetResult.retErr(RetCode.NOT_FOUND, "getDidPropertyByTxid exception:" + ex.getMessage());
         }
     }
 
@@ -459,7 +461,6 @@ public class ElaDidService {
             return null;
         }
 
-
         List<DidEntity.DidProperty> msgProperties = didEntity.getProperties();
         if ((null == msgProperties) || msgProperties.isEmpty()) {
             return null;
@@ -478,30 +479,7 @@ public class ElaDidService {
         return null;
     }
 
-    public ReturnMsgEntity transferEla(String nodeUrl, ElaChainType srcChainType, List<String> srcWalletPrivateKeys, ElaChainType dstChainType, Map<String, Double> dstAddrAndEla) {
-        ElaTransaction transaction = new ElaTransaction();
-        transaction.setChainInfo(nodeUrl, srcChainType, dstChainType);
-        for (String key : srcWalletPrivateKeys) {
-            String sendAddr = Ela.getAddressFromPrivate(key);
-            transaction.addSender(sendAddr, key);
-        }
-
-        for (Map.Entry<String, Double> entry : dstAddrAndEla.entrySet()) {
-            transaction.addReceiver(entry.getKey(), entry.getValue());
-        }
-
-        ReturnMsgEntity ret;
-        try {
-            ret = transaction.transfer();
-        } catch (Exception e) {
-            e.printStackTrace();
-            ret = new ReturnMsgEntity().setResult("Err: transferEla transfer failed"+e.getMessage()).setStatus(RetCodeConfiguration.PROCESS_ERROR);
-        }
-
-        return ret;
-    }
-
-    private Map<String, Object> sign(String privateKey, String msg) throws Exception {
+    private static Map<String, Object> sign(String privateKey, String msg) throws Exception {
         ECKey ec = ECKey.fromPrivate(DatatypeConverter.parseHexBinary(privateKey));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
@@ -518,7 +496,7 @@ public class ElaDidService {
         return result;
     }
 
-    private boolean verify(String hexPub, String hexSig, String hexMsg) {
+    private static boolean verify(String hexPub, String hexSig, String hexMsg) {
         byte[] msg = DatatypeConverter.parseHexBinary(hexMsg);
         byte[] sig = DatatypeConverter.parseHexBinary(hexSig);
         byte[] pub = DatatypeConverter.parseHexBinary(hexPub);

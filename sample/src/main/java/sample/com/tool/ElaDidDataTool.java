@@ -18,10 +18,12 @@ public class ElaDidDataTool {
     String did = "";
     String upload = "";
 
+    String didNodeUrl = "http://54.64.220.165:21604";
+
     final String help = "--name         the app name.\n" +
             "--mne          mnemonic, if not set, will generate a new one.\n\n";
 
-    ElaDidService didService = new ElaDidService();
+    ElaDidService didService = new ElaDidService(didNodeUrl, true);
 
     public void createAppInfoAndDid(String inAppName, String inMnemonic) throws Exception {
 

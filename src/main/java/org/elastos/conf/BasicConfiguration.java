@@ -13,8 +13,8 @@ package org.elastos.conf;
  * 11/23/18
  *
  */
-public class BasicConfiguration {
-    public static final long ONE_ELA = 100000000;
-    public static final double FEE = 0.000001;
-    public static final double CROSS_CHAIN_FEE = 0.0001;
+public interface BasicConfiguration {
+    long ONE_ELA = 100000000;
+    double FEE = 0.000001;
+    double CROSS_CHAIN_FEE = 0.0001;
 }
