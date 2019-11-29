@@ -76,7 +76,7 @@ public class ElaTransaction {
         if (srcChainType == dstChainType) {
             return BasicConfiguration.FEE;
         } else {
-            return BasicConfiguration.CROSS_CHAIN_FEE * 2 * BasicConfiguration.ONE_ELA;
+            return BasicConfiguration.CROSS_CHAIN_FEE * 2;
         }
     }
 

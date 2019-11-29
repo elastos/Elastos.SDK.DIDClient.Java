@@ -33,6 +33,8 @@ public interface ElaTransferService {
 
     RetResult<String> waitForTransactionReceipt(String txid);
 
+    RetResult<String> getTransactionReceipt(String txid);
+
     RetResult<Double> getBalance(String address);
 
     Credentials geneCredentialsByPrivateKey(String privateKey);

@@ -1,6 +1,5 @@
 package org.elastos.service;
 
-import com.sun.org.apache.regexp.internal.RE;
 import org.elastos.POJO.ElaChainType;
 import org.elastos.POJO.Credentials;
 import org.elastos.POJO.KeyPair;
@@ -221,6 +220,23 @@ public class EthService implements ElaTransferService {
         } else {
             TransactionReceipt transactionReceipt  = transactionReceiptOptional.get();
             return RetResult.retOk(transactionReceipt.getTransactionHash());
+        }
+    }
+
+    @Override
+    public RetResult<String> getTransactionReceipt(String txid) {
+        Optional<TransactionReceipt> receiptOptional =
+                null;
+        try {
+            receiptOptional = sendTransactionReceiptRequest(txid);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return RetResult.retErr(RetCode.NOT_FOUND, "Exception: " + e.getMessage());
+        }
+        if (receiptOptional.isPresent()) {
+            return RetResult.retOk(txid);
+        } else {
+            return RetResult.retErr(RetCode.NOT_FOUND, "Transaction hash not generated after " + ATTEMPTS + " attempts");
         }
     }
 

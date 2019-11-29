@@ -15,6 +15,7 @@ import org.elastos.util.HttpUtil;
 import org.elastos.util.RetResult;
 import org.elastos.util.ela.ElaKit;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +76,7 @@ public class BackendService {
 
         checkAddr(address);
 
-        RetResult msgEntity = elaReqChainData(ReqMethod.GET, getPrefix() + getUtosByAddr, address);
+        RetResult msgEntity = elaReqChainData(ReqMethod.GET, getPrefix() + getUtosByAddr, address, null);
         if (msgEntity.getCode() == RetCode.SUCC) {
             try {
                 List<Map> data = (List<Map>) msgEntity.getData();
@@ -99,17 +100,17 @@ public class BackendService {
 
         String jsonEntity = JSON.toJSONString(entity);
         System.out.println("tx send data:" + jsonEntity);
-        RetResult<String> msgEntity = elaReqChainData(ReqMethod.POST, getPrefix() + transaction, jsonEntity);
+        RetResult<String> msgEntity = elaReqChainData(ReqMethod.POST, getPrefix() + transaction, jsonEntity, String.class);
         return msgEntity;
     }
 
     public RetResult<Double> getBalance(String address) {
-         RetResult<Double> ret = elaReqChainData(ReqMethod.GET,getPrefix() + balance + "/" + address, null);
+         RetResult<Double> ret = elaReqChainData(ReqMethod.GET,getPrefix() + balance + "/" + address, null, Double.class);
          return ret;
     }
 
     public Map<String, Object> getTransaction(String txId) {
-        RetResult msgEntity = elaReqChainData(ReqMethod.GET, getPrefix() + transaction + "/", txId);
+        RetResult msgEntity = elaReqChainData(ReqMethod.GET, getPrefix() + transaction + "/", txId, null);
 
         if (msgEntity.getCode() == RetCode.SUCC) {
             return (Map<String, Object>) msgEntity.getData();
@@ -118,7 +119,7 @@ public class BackendService {
         }
     }
 
-    private <T> RetResult<T> elaReqChainData(ReqMethod method, String url, String data) {
+    private <T> RetResult<T> elaReqChainData(ReqMethod method, String url, String data, Class<T> clazz) {
         String response;
 
         if (ReqMethod.GET == method) {
@@ -138,7 +139,11 @@ public class BackendService {
         JSONObject msg =  JSON.parseObject(response);
         int err = msg.getInteger("Error");
         if (err == 0) {
-            return RetResult.retOk((T)msg.get("Result"));
+            if (null != clazz) {
+                return RetResult.retOk(msg.getObject("Result", clazz));
+            } else {
+                return RetResult.retOk((T)msg.get("Result"));
+            }
         } else {
             return RetResult.retErr(RetCode.RESPONSE_ERROR, "Error:"+err);
         }

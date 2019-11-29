@@ -143,19 +143,28 @@ public class ElaService implements ElaTransferService {
     }
 
     @Override
-    public RetResult<String> waitForTransactionReceipt(String transactionHash) {
+    public RetResult<String> waitForTransactionReceipt(String txid) {
 
         for (int i = 0; i < ATTEMPTS; i++) {
             try {
                 TimeUnit.MINUTES.sleep(SLEEP_DURATION);
             } catch (InterruptedException e) {
             }
-            Map<String, Object> ret = this.backendService.getTransaction(transactionHash);
+            Map<String, Object> ret = this.backendService.getTransaction(txid);
             if (null != ret) {
-                return RetResult.retOk(transactionHash);
+                return RetResult.retOk(txid);
             }
         }
 
+        return RetResult.retErr(RetCode.NOT_FOUND, "Transaction hash not generated after " + ATTEMPTS + " attempts");
+    }
+
+    @Override
+    public RetResult<String> getTransactionReceipt(String txid) {
+        Map<String, Object> ret = this.backendService.getTransaction(txid);
+        if (null != ret) {
+            return RetResult.retOk(txid);
+        }
         return RetResult.retErr(RetCode.NOT_FOUND, "Transaction hash not generated after " + ATTEMPTS + " attempts");
     }
 

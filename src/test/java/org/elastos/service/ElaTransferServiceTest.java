@@ -19,8 +19,8 @@ public class ElaTransferServiceTest {
     private String didUrl = "http://54.64.220.165:21604";
     private String ethUrl = "http://rpc.elaeth.io:8545";
 
-    private String elaPrivateKey = "17f9885d36ce7c646cd1d613708e9b375f81b81309fbdfbd922d0cd72faadb1b";
-    private String elaPublicAddr = "EJqsNp9qSWkX7wkkKeKnqeubok6FxuA9un";
+    private String elaPrivateKey = "FEDF4265E4B459074754C4A09420A278C7316959A48EA964263E86DECECEF232";
+    private String elaPublicAddr = "EZdDnKBRnV8o77gjr1M3mWBLZqLA3WBjB7";
 
     private String didPrivateKey = "17f9885d36ce7c646cd1d613708e9b375f81b81309fbdfbd922d0cd72faadb1b";
     private String didPublicAddr = "EJqsNp9qSWkX7wkkKeKnqeubok6FxuA9un";
@@ -83,36 +83,36 @@ public class ElaTransferServiceTest {
 
     @Test
     public void transfer() throws Exception {
-        Credentials srcElaCre = elaService.geneCredentialsByPrivateKey(elaPrivateKey);
-        RetResult<Credentials> elaResult = elaService.geneCredentials(elaMemo, 0);
-        assertEquals("ela credentials", elaResult.getCode().longValue(), RetCode.SUCC);
-        Credentials dstElaCre = elaResult.getData();
-        RetResult<Double> elaFee =elaService.estimateTransactionFee(srcElaCre.getAddress(), ElaChainType.ELA_CHAIN, dstElaCre.getAddress(), 0.1);
-        assertEquals("ela fee:" + elaFee.getMsg(), elaFee.getCode().longValue(), RetCode.SUCC);
-        System.out.println("ela transfer fee:" + elaFee.getData());
-        RetResult<String> elaTxid = elaService.transfer(srcElaCre, dstElaCre.getAddress(), 0.1);
-        assertEquals("ela txid:" + elaTxid.getMsg(), elaTxid.getCode().longValue(), RetCode.SUCC);
-        elaTxid = elaService.waitForTransactionReceipt(elaTxid.getData());
-        assertEquals("ela txid:" + elaTxid.getMsg(), elaTxid.getCode().longValue(), RetCode.SUCC);
-        RetResult<Double> elaBalance = elaService.getBalance(dstElaCre.getAddress());
-        assertEquals("ela balance:" + elaBalance.getMsg(), elaBalance.getCode().longValue(), RetCode.SUCC);
-        System.out.println("ela balance:" + elaBalance.getData());
-
-
-        Credentials srcDidCre = didService.geneCredentialsByPrivateKey(didPrivateKey);
-        RetResult<Credentials> didResult = didService.geneCredentials(didMemo, 0);
-        assertEquals("did credentials", didResult.getCode().longValue(), RetCode.SUCC);
-        Credentials dstDidCre = didResult.getData();
-        RetResult<Double> didFee =didService.estimateTransactionFee(srcDidCre.getAddress(), ElaChainType.DID_CHAIN, dstDidCre.getAddress(), 0.1);
-        assertEquals("did fee:" + didFee.getMsg(), didFee.getCode().longValue(), RetCode.SUCC);
-        System.out.println("did transfer fee:" + didFee.getData());
-        RetResult<String> didTxid = didService.transfer(srcDidCre, dstDidCre.getAddress(), 0.1);
-        assertEquals("did txid:" + didTxid.getMsg(), didTxid.getCode().longValue(), RetCode.SUCC);
-        didTxid = didService.waitForTransactionReceipt(didTxid.getData());
-        assertEquals("did txid:" + didTxid.getMsg(), didTxid.getCode().longValue(), RetCode.SUCC);
-        RetResult<Double> didBalance = elaService.getBalance(dstDidCre.getAddress());
-        assertEquals("did balance:" + didBalance.getMsg(), didBalance.getCode().longValue(), RetCode.SUCC);
-        System.out.println("did balance:" + didBalance.getData());
+//        Credentials srcElaCre = elaService.geneCredentialsByPrivateKey(elaPrivateKey);
+//        RetResult<Credentials> elaResult = elaService.geneCredentials(elaMemo, 0);
+//        assertEquals("ela credentials", elaResult.getCode().longValue(), RetCode.SUCC);
+//        Credentials dstElaCre = elaResult.getData();
+//        RetResult<Double> elaFee =elaService.estimateTransactionFee(srcElaCre.getAddress(), ElaChainType.ELA_CHAIN, dstElaCre.getAddress(), 0.1);
+//        assertEquals("ela fee:" + elaFee.getMsg(), elaFee.getCode().longValue(), RetCode.SUCC);
+//        System.out.println("ela transfer fee:" + elaFee.getData());
+//        RetResult<String> elaTxid = elaService.transfer(srcElaCre, dstElaCre.getAddress(), 0.1);
+//        assertEquals("ela txid:" + elaTxid.getMsg(), elaTxid.getCode().longValue(), RetCode.SUCC);
+//        elaTxid = elaService.waitForTransactionReceipt(elaTxid.getData());
+//        assertEquals("ela txid:" + elaTxid.getMsg(), elaTxid.getCode().longValue(), RetCode.SUCC);
+//        RetResult<Double> elaBalance = elaService.getBalance(dstElaCre.getAddress());
+//        assertEquals("ela balance:" + elaBalance.getMsg(), elaBalance.getCode().longValue(), RetCode.SUCC);
+//        System.out.println("ela balance:" + elaBalance.getData());
+//
+//
+//        Credentials srcDidCre = didService.geneCredentialsByPrivateKey(didPrivateKey);
+//        RetResult<Credentials> didResult = didService.geneCredentials(didMemo, 0);
+//        assertEquals("did credentials", didResult.getCode().longValue(), RetCode.SUCC);
+//        Credentials dstDidCre = didResult.getData();
+//        RetResult<Double> didFee =didService.estimateTransactionFee(srcDidCre.getAddress(), ElaChainType.DID_CHAIN, dstDidCre.getAddress(), 0.1);
+//        assertEquals("did fee:" + didFee.getMsg(), didFee.getCode().longValue(), RetCode.SUCC);
+//        System.out.println("did transfer fee:" + didFee.getData());
+//        RetResult<String> didTxid = didService.transfer(srcDidCre, dstDidCre.getAddress(), 0.1);
+//        assertEquals("did txid:" + didTxid.getMsg(), didTxid.getCode().longValue(), RetCode.SUCC);
+//        didTxid = didService.waitForTransactionReceipt(didTxid.getData());
+//        assertEquals("did txid:" + didTxid.getMsg(), didTxid.getCode().longValue(), RetCode.SUCC);
+//        RetResult<Double> didBalance = elaService.getBalance(dstDidCre.getAddress());
+//        assertEquals("did balance:" + didBalance.getMsg(), didBalance.getCode().longValue(), RetCode.SUCC);
+//        System.out.println("did balance:" + didBalance.getData());
 
 
         Credentials srcEthCre = ethService.geneCredentialsByPrivateKey(ethPrivateKey);
@@ -198,15 +198,32 @@ public class ElaTransferServiceTest {
 
     @Test
     public void getBalance() throws Exception {
-        Credentials dstDidCre = didService.geneCredentialsByPrivateKey(didPrivateKey);
-        didService.getBalance(dstDidCre.getAddress());
+//        Credentials dstDidCre = didService.geneCredentialsByPrivateKey(didPrivateKey);
+//        didService.getBalance(dstDidCre.getAddress());
+
+//        RetResult<Double> retRest = ethService.getBalance("0xb3597A4Ed6aA224dF9741322805F9C8BDC6Ab9A4");
+        RetResult<Double> retRest = ethService.getBalance("0x8a01678ae58e1839e02546538484bad7ef53f8ee");
+        if (retRest.getCode() == RetCode.SUCC) {
+            System.out.println("rest:" + retRest.getData());
+        } else {
+            System.out.println("Err getBalance msg:" + retRest.getMsg());
+        }
     }
 
     @Test
     public void transferEla() throws Exception {
         Credentials srcElaCre = elaService.geneCredentialsByPrivateKey(elaPrivateKey);
-        String dstAddr = "EJqsNp9qSWkX7wkkKeKnqeubok6FxuA9un";
-        RetResult<String> elaTxid = elaService.transfer(srcElaCre, dstAddr, 10);
+        String dstAddr = "ETyT1LGW6ZqKUDzstEwCCc5xpK3JLCY3XJ";
+        RetResult<String> elaTxid = elaService.transfer(srcElaCre, dstAddr, 0.3);
+        assertEquals("ela txid:" + elaTxid.getMsg(), elaTxid.getCode().longValue(), RetCode.SUCC);
+        System.out.println("ela txid:" + elaTxid.getData());
+    }
+
+    @Test
+    public void transferEth() throws Exception {
+        Credentials srcEthCre = ethService.geneCredentialsByPrivateKey(ethPrivateKey);
+        String dstAddr = "0xd2c9ec9731422ef02a10a3e612a8aa96c7e3db8b";
+        RetResult<String> elaTxid = ethService.transfer(srcEthCre, dstAddr, 0.3);
         assertEquals("ela txid:" + elaTxid.getMsg(), elaTxid.getCode().longValue(), RetCode.SUCC);
         System.out.println("ela txid:" + elaTxid.getData());
     }
