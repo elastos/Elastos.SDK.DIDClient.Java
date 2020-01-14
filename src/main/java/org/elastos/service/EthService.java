@@ -254,7 +254,7 @@ public class EthService implements ElaTransferService {
             } else {
                 return RetResult.retErr(RetCode.RESPONSE_ERROR, "Err ethGetBalance failed" + ethGetBalance.getError());
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return RetResult.retErr(RetCode.INTERNAL_EXCEPTION, "Err ethGetBalance exception:" + e.getMessage());
         }
