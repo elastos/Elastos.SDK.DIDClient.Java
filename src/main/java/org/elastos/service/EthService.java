@@ -108,9 +108,10 @@ public class EthService implements ElaTransferService {
     public RetResult<String> transferToMainChain(Credentials credentials, String dstAddress, double withdrawAmount) {
 
         BigInteger value = Convert.toWei(BigDecimal.valueOf(withdrawAmount), Convert.Unit.ETHER).toBigInteger();
+        BigInteger roundValue = value.divide(new BigInteger(EthConfiguration.ETH_CHAIN_ROUND)).multiply(new BigInteger(EthConfiguration.ETH_CHAIN_ROUND));
         Function function = new Function(
                 "receivePayload",
-                Arrays.asList(new Utf8String(dstAddress), new Uint256(value), new Uint256(new BigInteger(EthConfiguration.CROSS_CHAIN_FEE))),
+                Arrays.asList(new Utf8String(dstAddress), new Uint256(roundValue), new Uint256(new BigInteger(EthConfiguration.CROSS_CHAIN_FEE))),
                 Collections.emptyList());
         String encodedFunction = FunctionEncoder.encode(function);
 
@@ -133,7 +134,7 @@ public class EthService implements ElaTransferService {
         }
 
         RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice,
-                new BigInteger(EthConfiguration.CROSS_CHAIN_GAS_LIMIT), contractAddress, value, encodedFunction);
+                new BigInteger(EthConfiguration.CROSS_CHAIN_GAS_LIMIT), contractAddress, roundValue, encodedFunction);
 
         byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credential);
         String hexValue = Numeric.toHexString(signedMessage);
