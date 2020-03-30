@@ -371,6 +371,9 @@ public class ElaDidService {
         return rawData;
     }
 
+    public RetResult<String> upChainByWallet(String payWalletPrivateKey, String rawDidData){
+        return upChainByWallet(payWalletPrivateKey, rawDidData, null);
+    }
     /**
      * Sent raw data to did chain use wallet to pay
      *
@@ -378,7 +381,7 @@ public class ElaDidService {
      * @param rawDidData
      * @return
      */
-    public RetResult<String> upChainByWallet(String payWalletPrivateKey, String rawDidData) {
+    public RetResult<String> upChainByWallet(String payWalletPrivateKey, String rawDidData, String dstAddress) {
         //Pack data to tx for record.
         ElaTransaction transaction = new ElaTransaction(backendService, ElaChainType.DID_CHAIN, ElaChainType.DID_CHAIN);
         transaction.setMemo(rawDidData);
@@ -387,8 +390,13 @@ public class ElaDidService {
         if (retSender.getCode() != RetCode.SUCC) {
             return RetResult.retErr(retSender.getCode(), "Err: sentRawDataToChain " + retSender.getMsg());
         }
-        //Transfer ela to sender itself. the only record payment is miner FEE.
-        transaction.addReceiver(sendAddr, BasicConfiguration.FEE);
+
+        if (null == dstAddress) {
+            //Transfer ela to sender itself. the only record payment is miner FEE.
+            transaction.addReceiver(sendAddr, BasicConfiguration.FEE);
+        } else {
+            transaction.addReceiver(dstAddress, BasicConfiguration.FEE);
+        }
         try {
             RetResult<String> ret = transaction.transfer();
             return ret;
