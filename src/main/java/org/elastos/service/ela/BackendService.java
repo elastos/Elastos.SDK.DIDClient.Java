@@ -8,6 +8,7 @@ package org.elastos.service.ela;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.elastos.POJO.ElaChainType;
 import org.elastos.constant.RetCode;
 import org.elastos.entity.Errors;
 import org.elastos.exception.ApiRequestDataException;
@@ -16,6 +17,7 @@ import org.elastos.util.RetResult;
 import org.elastos.util.ela.ElaKit;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +28,7 @@ public class BackendService {
 
     private final static String getUtosByAddr = "/api/v1/asset/utxos/";
     private final static String transaction = "/api/v1/transaction";
-    private final static String  balance= "/api/v1/asset/balances";
+    private final static String balance = "/api/v1/asset/balances";
 
 //    {
 //        boolean ret = OutSideConfig.readOutSide();
@@ -40,7 +42,7 @@ public class BackendService {
     }
 
     public void setTestNet(boolean isTestNet) {
-       testNet = isTestNet;
+        testNet = isTestNet;
     }
 
     public boolean isTestNet() {
@@ -72,7 +74,7 @@ public class BackendService {
         }
     }
 
-    public RetResult<List<Map>> getUtxoListByAddr(String address) {
+    public RetResult<List<Map>> getUtxoListByAddr(ElaChainType chainType, String address) {
 
         checkAddr(address);
 
@@ -80,7 +82,15 @@ public class BackendService {
         if (msgEntity.getCode() == RetCode.SUCC) {
             try {
                 List<Map> data = (List<Map>) msgEntity.getData();
-                List<Map> utxoList = (List<Map>) data.get(0).get("Utxo");
+                List<Map> utxoList;
+                if (chainType == ElaChainType.DID_CHAIN) {
+                    utxoList = (List<Map>) data.get(0).get("Utxo");
+                } else {
+                    utxoList = new ArrayList<>();
+                    for (Map d : data) {
+                        utxoList.addAll((List) d.get("UTXO"));
+                    }
+                }
 
                 return RetResult.retOk(utxoList);
             } catch (Exception ex) {
@@ -105,8 +115,8 @@ public class BackendService {
     }
 
     public RetResult<Double> getBalance(String address) {
-         RetResult<Double> ret = elaReqChainData(ReqMethod.GET,getPrefix() + balance + "/" + address, null, Double.class);
-         return ret;
+        RetResult<Double> ret = elaReqChainData(ReqMethod.GET, getPrefix() + balance + "/" + address, null, Double.class);
+        return ret;
     }
 
     public Map<String, Object> getTransaction(String txId) {
@@ -133,19 +143,19 @@ public class BackendService {
         }
 
         if (null == response) {
-            return  RetResult.retErr(RetCode.NETWORK_FAILED, "http failed");
+            return RetResult.retErr(RetCode.NETWORK_FAILED, "http failed");
         }
 
-        JSONObject msg =  JSON.parseObject(response);
+        JSONObject msg = JSON.parseObject(response);
         int err = msg.getInteger("Error");
         if (err == 0) {
             if (null != clazz) {
                 return RetResult.retOk(msg.getObject("Result", clazz));
             } else {
-                return RetResult.retOk((T)msg.get("Result"));
+                return RetResult.retOk((T) msg.get("Result"));
             }
         } else {
-            return RetResult.retErr(RetCode.RESPONSE_ERROR, "Error:"+err);
+            return RetResult.retErr(RetCode.RESPONSE_ERROR, "Error:" + err);
         }
     }
 }

@@ -39,7 +39,7 @@ public class ElaTransaction {
         }
 
         RetResult<List<Map>> getUtxo() {
-            RetResult<List<Map>> utxoRet = backendService.getUtxoListByAddr(address);
+            RetResult<List<Map>> utxoRet = backendService.getUtxoListByAddr(srcChainType, address);
             if (utxoRet.getCode() == RetCode.SUCC) {
                 utxoList = utxoRet.getData();
             }
