@@ -1,4 +1,4 @@
-package com.github.fusionledger.elastos.sdk.did.pojo
+package com.github.fusionledger.elastos.sdk.did.pojo;
 
 import algebra.fields.AbstractFieldElementExpanded;
 import algebra.curves.AbstractG1;
@@ -14,7 +14,7 @@ import zk_proof_systems.zkSNARK.objects.Proof;
 import zk_proof_systems.zkSNARK.objects.ProvingKey;
 
 
-public class IdentityProofs {
+public class IdentityProof {
     private KeyPair keyPair;
     private String address;
     private String proofType;
